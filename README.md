@@ -240,8 +240,8 @@ http://localhost:3000
 
 * Multi-restaurant platform support
 * Inventory tracking
-* Order analytics dashboard
-* Real-time order updates
+* Delivery tracking
+* Ontime payment gateway integration
 * Integration with payment systems
 
 ---
