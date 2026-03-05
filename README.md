@@ -231,7 +231,7 @@ npm run dev
 Frontend runs at:
 
 ```
-http://localhost:5173
+http://localhost:3000
 ```
 
 ---
