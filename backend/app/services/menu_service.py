@@ -1,5 +1,5 @@
 from app.repositories.menu_item_repository import MenuItemRepository
-from backend.app.models.menu_item import MenuItem
+from app.models.menu_item import MenuItem
 
 class MenuService:
     def __init__(self, db_session):
