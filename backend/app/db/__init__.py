@@ -43,6 +43,13 @@ def _migrate_sqlite_schema():
     existing_tables = set(inspector.get_table_names())
 
     with engine.begin() as connection:
+        if "users" in existing_tables:
+            user_columns = {column["name"] for column in inspector.get_columns("users")}
+            if "hashed_password" not in user_columns:
+                connection.execute(
+                    text("ALTER TABLE users ADD COLUMN hashed_password VARCHAR NOT NULL DEFAULT ''")
+                )
+
         if "orders" in existing_tables:
             order_columns = {column["name"] for column in inspector.get_columns("orders")}
             if "table_id" not in order_columns:

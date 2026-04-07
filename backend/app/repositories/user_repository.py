@@ -7,8 +7,8 @@ class UserRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def create(self, *, username: str, email: str, role: UserRole = UserRole.STAFF) -> User:
-        user = User(username=username, email=email, role=role)
+    def create(self, *, username: str, hashed_password: str, role: UserRole = UserRole.STAFF) -> User:
+        user = User(username=username, hashed_password=hashed_password, role=role)
         self.db.add(user)
         self.db.commit()
         self.db.refresh(user)
@@ -19,6 +19,12 @@ class UserRepository:
 
     def get_by_username(self, username: str) -> User | None:
         return self.db.query(User).filter(User.username == username).first()
+
+    def get_first_owner(self) -> User | None:
+        return self.db.query(User).filter(User.role == UserRole.OWNER).first()
+
+    def owner_exists(self) -> bool:
+        return self.get_first_owner() is not None
 
     def list_all(self) -> list[User]:
         return self.db.query(User).all()
@@ -33,3 +39,6 @@ class UserRepository:
     def delete(self, user: User) -> None:
         self.db.delete(user)
         self.db.commit()
+        
+    def find_existing_user(self, username: str) -> User | None:
+        return self.db.query(User).filter(User.username == username).first()
