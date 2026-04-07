@@ -5,7 +5,6 @@ from app.db import Base
 
 
 class UserRole(str, Enum):
-    CUSTOMER = "customer"
     STAFF = "staff"
     OWNER = "owner"
 
@@ -19,5 +18,5 @@ class User(Base):
     role = Column(
         SQLEnum(UserRole, name="user_role"),
         nullable=False,
-        default=UserRole.CUSTOMER,
+        default=UserRole.STAFF,
     )

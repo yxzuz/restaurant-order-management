@@ -3,7 +3,7 @@
 ## Overview
 
 This project is a web-based system designed to replace paper-based order tracking in small and medium-sized restaurants.
-It allows customers to place orders digitally, staff to manage order status, and restaurant owners to monitor operations and view analytics.
+It allows table-based customer ordering without customer login, staff to manage order status and payment, and restaurant owners to monitor operations and view analytics.
 
 The system focuses on **order workflow management** rather than payment processing.
 
@@ -40,15 +40,15 @@ The main goals of the system are:
 
 ### Authentication & Authorization
 
-* Secure login and logout
-* User authentication
+* Staff and owner login
 * Role-based access control
 * Permission-based system actions
 
 ### Order Management
 
-* Create and manage restaurant orders
+* Create and manage table-based restaurant orders
 * Track order lifecycle
+* Track payment status separately
 * View order history
 
 ### Menu Management
@@ -65,20 +65,19 @@ The main goals of the system are:
 
 ## User Roles
 
-### Customer
+### Customer / Table Session
 
 Responsibilities:
 
 * Browse menu
-* Place orders
-* View order status
-* Cancel pending orders
+* Place orders by table
+* View current table order status
+* Request cancellation before preparation starts
 
 Permissions:
 
-* Create orders
-* View own orders
-* Cancel own pending orders
+* Create orders for the active table
+* View the active table order
 
 ---
 
@@ -118,7 +117,7 @@ Permissions:
 
 1. User logs into the system.
 2. The system authenticates credentials and assigns role permissions.
-3. Customer places an order.
+3. Customer places an order using a table-based flow.
 4. The order is stored in the database with status **New**.
 5. Staff updates order status:
 
@@ -127,7 +126,8 @@ Permissions:
    * Ready
    * Completed
    * Cancelled
-6. Restaurant owner monitors orders and views reports.
+6. Staff marks the order as paid, which closes the active table order.
+7. Restaurant owner monitors orders and views reports.
 
 ---
 
@@ -202,8 +202,10 @@ restaurant-order-tracking-system
 
 ```
 cd backend
-pip install -r requirements.txt
-uvicorn main:app --reload
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+python -m uvicorn app.main:app --reload
 ```
 
 Backend runs at:
@@ -217,6 +219,21 @@ API documentation available at:
 ```
 http://localhost:8000/docs
 ```
+
+Current API highlights:
+
+* `GET /api/menus`
+* `GET /api/tables`
+* `GET /api/tables/{table_number}/active-order?qr_token=...`
+* `POST /api/orders`
+* `GET /api/orders/active`
+* `PATCH /api/orders/{order_id}/status`
+* `PATCH /api/orders/{order_id}/payment`
+
+QR flow note:
+
+* Each table should have a QR code that points to a frontend route containing the table number and QR token.
+* The frontend should pass both values to the backend so the backend can validate the table before exposing or creating an order.
 
 ---
 

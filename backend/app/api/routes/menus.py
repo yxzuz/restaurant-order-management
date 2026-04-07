@@ -11,8 +11,7 @@ router = APIRouter()
 @router.get("/", response_model=list[MenuItemRead])
 def list_menus(db: Session = Depends(get_db)):
     service = MenuService(db)
-    # return service.list_menu_items()
-    return service.mock_get_menu()
+    return service.list_menu_items()
 
 
 @router.get("/{item_id}", response_model=MenuItemRead)

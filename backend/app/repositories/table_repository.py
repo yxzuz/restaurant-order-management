@@ -1,0 +1,43 @@
+from sqlalchemy.orm import Session
+
+from app.models.table import Table, TableStatus
+
+
+class TableRepository:
+    def __init__(self, db: Session):
+        self.db = db
+
+    def list_all(self) -> list[Table]:
+        return self.db.query(Table).order_by(Table.number.asc()).all()
+
+    def get_by_id(self, table_id: int) -> Table | None:
+        return self.db.query(Table).filter(Table.id == table_id).first()
+
+    def get_by_number(self, number: int) -> Table | None:
+        return self.db.query(Table).filter(Table.number == number).first()
+
+    def get_by_number_and_qr_token(self, number: int, qr_token: str) -> Table | None:
+        return (
+            self.db.query(Table)
+            .filter(Table.number == number, Table.qr_token == qr_token)
+            .first()
+        )
+
+    def create(
+        self,
+        *,
+        number: int,
+        qr_token: str,
+        status: TableStatus = TableStatus.AVAILABLE,
+    ) -> Table:
+        table = Table(number=number, qr_token=qr_token, status=status)
+        self.db.add(table)
+        self.db.commit()
+        self.db.refresh(table)
+        return table
+
+    def update_status(self, table: Table, status: TableStatus) -> Table:
+        table.status = status
+        self.db.commit()
+        self.db.refresh(table)
+        return table
