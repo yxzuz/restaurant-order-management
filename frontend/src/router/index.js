@@ -11,6 +11,11 @@ const routes = [
   path: '/owner/dashboard',
   component: () => import('@/views/OwnerDashboard.vue')
   },
+  {
+    path: '/owner/menu',
+    component: () => import('@/views/OwnerMenu.vue')
+  }
+
 ]
 
 const router = createRouter({

@@ -1,6 +1,6 @@
 <template>
   <aside
-    class="flex h-screen shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-all duration-200"
+    class="sticky top-0 flex h-screen shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-all duration-200"
     :class="collapsed ? 'w-20' : 'w-72'"
   >
     <div class="flex items-center justify-between border-b border-sidebar-border px-4 py-4">
@@ -29,7 +29,7 @@
       </p>
     </div> -->
 
-    <nav class="flex-1 space-y-1 px-3">
+    <nav class="flex-1 space-y-1 overflow-y-auto px-3 py-3">
       <router-link
         v-for="item in items"
         :key="item.title"
@@ -44,7 +44,7 @@
       </router-link>
     </nav>
 
-    <div class="border-t border-sidebar-border p-3">
+    <div class="mt-auto border-t border-sidebar-border p-3">
       <button
         @click="logout"
         class="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium text-muted-foreground transition hover:bg-sidebar-accent hover:text-sidebar-primary"

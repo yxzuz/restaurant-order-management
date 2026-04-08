@@ -1,9 +1,9 @@
 <template>
-  <div class="flex min-h-screen bg-background">
+  <div class="flex h-screen bg-background">
     <AppSidebar :role="role" :collapsed="sidebarCollapsed" @toggle="toggleSidebar" />
 
-    <div class="flex min-w-0 flex-1 flex-col">
-      <header class="flex h-16 items-center justify-between border-b border-border bg-card px-4 md:px-6">
+    <div class="flex min-w-0 flex-1 flex-col overflow-hidden">
+      <header class="flex h-16 shrink-0 items-center justify-between border-b border-border bg-card px-4 md:px-6">
         <div>
           <p class="text-xs font-medium uppercase tracking-[0.25em] text-muted-foreground">
             {{ role === 'owner' ? 'Owner Portal' : 'Staff Portal' }}
