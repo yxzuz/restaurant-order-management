@@ -6,6 +6,7 @@ from app.db import get_db
 from app.models.user import User
 from app.schemas.user import (
     LoginRequest,
+    MessageResponse,
     OwnerBootstrapCreate,
     StaffCreate,
     Token,
@@ -40,6 +41,11 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)):
 @router.get("/me", response_model=UserRead)
 def get_me(current_user: User = Depends(get_current_user)):
     return current_user
+
+
+@router.post("/logout", response_model=MessageResponse)
+def logout(current_user: User = Depends(get_current_user)):
+    return {"message": f"User '{current_user.username}' logged out successfully"}
 
 
 @router.post("/staff", response_model=UserRead, status_code=status.HTTP_201_CREATED)

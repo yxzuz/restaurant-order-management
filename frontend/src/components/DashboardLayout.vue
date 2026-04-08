@@ -1,17 +1,39 @@
 <template>
-  <div class="flex min-h-screen bg-gray-100">
+  <div class="flex min-h-screen bg-background">
+    <AppSidebar :role="role" :collapsed="sidebarCollapsed" @toggle="toggleSidebar" />
 
-    <!-- Sidebar -->
-    <AppSidebar role="owner" />
+    <div class="flex min-w-0 flex-1 flex-col">
+      <header class="flex h-16 items-center justify-between border-b border-border bg-card px-4 md:px-6">
+        <div>
+          <p class="text-xs font-medium uppercase tracking-[0.25em] text-muted-foreground">
+            {{ role === 'owner' ? 'Owner Portal' : 'Staff Portal' }}
+          </p>
+          <p class="mt-1 text-sm text-foreground">Restaurant order operations</p>
+        </div>
+      </header>
 
-    <!-- Right content -->
-    <div class="flex-1 p-6">
-      <slot />
+      <main class="flex-1 overflow-auto p-4 md:p-6 lg:p-8">
+        <slot />
+      </main>
     </div>
-
   </div>
 </template>
 
 <script setup>
+import { ref } from 'vue'
+
 import AppSidebar from '@/components/AppSidebar.vue'
+
+defineProps({
+  role: {
+    type: String,
+    default: 'owner',
+  },
+})
+
+const sidebarCollapsed = ref(false)
+
+function toggleSidebar() {
+  sidebarCollapsed.value = !sidebarCollapsed.value
+}
 </script>
