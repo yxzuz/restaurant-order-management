@@ -7,6 +7,10 @@ const routes = [
     name: 'Home',
     component: Home,
   },
+  {
+  path: '/owner/dashboard',
+  component: () => import('@/views/OwnerDashboard.vue')
+  },
 ]
 
 const router = createRouter({
