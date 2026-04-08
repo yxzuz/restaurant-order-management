@@ -1,66 +1,87 @@
 <template>
-  <div class="home">
-    <h1>Restaurant Order Management</h1>
-    <p>Welcome to the restaurant order management system</p>
-    <div class="features">
-      <div class="feature-card">
-        <h3>📋 Orders</h3>
-        <p>Manage customer orders</p>
+  <div class="min-h-screen bg-background">
+
+    <!-- HERO -->
+    <section class="relative h-[50vh] min-h-[360px] overflow-hidden">
+      <img
+        src="@/assets/hero-restaurant.jpg"
+        class="absolute inset-0 w-full h-full object-cover"
+      />
+
+      <div class="absolute inset-0 bg-black/60"></div>
+
+      <div class="relative z-10 h-full flex flex-col items-center justify-center text-center px-4">
+        <div class="flex items-center gap-2 mb-4">
+          <UtensilsCrossed class="h-8 w-8 text-orange-400" />
+          <h1 class="text-4xl md:text-5xl font-bold text-white">
+            OrderFlow
+          </h1>
+        </div>
+
+        <p class="text-gray-200 text-lg max-w-md">
+          Digital restaurant order tracking — fast, accurate, and effortless.
+        </p>
       </div>
-      <div class="feature-card">
-        <h3>🍽️ Menu</h3>
-        <p>View and update menu items</p>
+    </section>
+
+    <!-- ROLES -->
+    <section class="max-w-4xl mx-auto -mt-16 relative z-20 pb-16 px-4">
+      <div class="grid gap-4 md:grid-cols-3">
+
+        <router-link
+          v-for="role in roles"
+          :key="role.title"
+          :to="role.link"
+        >
+          <div class="bg-white rounded-2xl p-6 shadow-lg hover:-translate-y-1 hover:shadow-xl transition cursor-pointer text-center">
+
+            <component :is="role.icon" :class="['h-10 w-10 mx-auto mb-2', role.iconClass]" />
+
+            <h3 class="text-xl font-semibold">
+              {{ role.title }}
+            </h3>
+
+            <p class="text-gray-600 mt-2">
+              {{ role.description }}
+            </p>
+
+          </div>
+        </router-link>
+
       </div>
-      <div class="feature-card">
-        <h3>👥 Customers</h3>
-        <p>Customer management</p>
-      </div>
-    </div>
+
+      <p class="mt-10 text-center text-sm text-gray-500">
+        Demo mode — click any role above to explore the platform.
+      </p>
+    </section>
+
   </div>
 </template>
 
-<script>
-export default {
-  name: 'Home',
-}
+<script setup>
+import { UtensilsCrossed, ClipboardList, BarChart3, QrCode } from 'lucide-vue-next'
+
+const roles = [
+  {
+    title: 'Customer',
+    description: 'Browse the menu and place orders from your table',
+    icon: QrCode,
+    iconClass: 'text-orange-600',
+    link: '/table/5?token=qr-token-5',
+  },
+  {
+    title: 'Staff',
+    description: 'View and manage incoming orders in real-time',
+    icon: ClipboardList,
+    iconClass: 'text-blue-600',
+    link: '/staff/orders',
+  },
+  {
+    title: 'Owner',
+    description: 'Manage menu, staff, and view analytics',
+    icon: BarChart3,
+    iconClass: 'text-green-600',
+    link: '/owner/dashboard',
+  },
+]
 </script>
-
-<style scoped>
-.home {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 40px 20px;
-  text-align: center;
-}
-
-h1 {
-  color: #2c3e50;
-  margin-bottom: 20px;
-  font-size: 2.5rem;
-}
-
-.features {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-  margin-top: 40px;
-}
-
-.feature-card {
-  background: #f8f9fa;
-  border-radius: 8px;
-  padding: 30px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s;
-}
-
-.feature-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-.feature-card h3 {
-  font-size: 1.5rem;
-  margin-bottom: 10px;
-}
-</style>
