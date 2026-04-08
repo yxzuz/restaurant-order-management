@@ -11,5 +11,7 @@ class MenuItem(Base):
     name = Column(String, nullable=False, index=True)
     price = Column(Numeric(10, 2), nullable=False)
     is_available = Column(Boolean, nullable=False, default=True)
+    category = Column(String, nullable=False, default="main_course")
+    image_url = Column(String, nullable=True)
 
     order_items = relationship("OrderItem", back_populates="menu_item")

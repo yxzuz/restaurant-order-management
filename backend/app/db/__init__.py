@@ -66,6 +66,13 @@ def _migrate_sqlite_schema():
             if "qr_token" not in table_columns:
                 connection.execute(text("ALTER TABLE tables ADD COLUMN qr_token VARCHAR(64)"))
 
+        if "menu_items" in existing_tables:
+            menu_columns = {column["name"] for column in inspector.get_columns("menu_items")}
+            if "category" not in menu_columns:
+                connection.execute(text("ALTER TABLE menu_items ADD COLUMN category VARCHAR NOT NULL DEFAULT 'main_course'"))
+            if "image_url" not in menu_columns:
+                connection.execute(text("ALTER TABLE menu_items ADD COLUMN image_url VARCHAR"))
+
     _backfill_table_tokens()
 
 

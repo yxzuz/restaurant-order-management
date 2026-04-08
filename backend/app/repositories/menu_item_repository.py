@@ -7,8 +7,14 @@ class MenuItemRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def create(self, *, name: str, price, is_available: bool = True) -> MenuItem:
-        menu_item = MenuItem(name=name, price=price, is_available=is_available)
+    def create(self, *, name: str, price, is_available: bool = True, category: str = "main course", image_url: str | None = None) -> MenuItem:
+        menu_item = MenuItem(
+            name=name,
+            price=price,
+            is_available=is_available,
+            category=category,
+            image_url=image_url,
+        )
         self.db.add(menu_item)
         self.db.commit()
         self.db.refresh(menu_item)
