@@ -1,87 +1,92 @@
 <template>
-    <DashboardLayout role="owner">
-        <div class="space-y-6">
-            <div class="flex items-start justify-between">
-                <div>
-                    <h1 class="font-heading text-3xl font-bold text-foreground">Menu Management</h1>
-                    <p class="mt-1 text-sm text-muted-foreground">Add, edit, or remove menu items</p>
-                    
-                </div>
-                <!-- Right side (button) -->
-                <button class="px-4 py-2 bg-primary text-white rounded-lg">
-                    + Add Item
-                </button>
-                <p>dfsdfds</p>
-            </div>
-            <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                <OwnerMenuItemCard
-                    v-for="item in menuItems"
-                    :key="item.id"
-                    :item="item"
-                    @edit="openEdit"
-                    @delete="deleteItem"
-                    @toggle-availability="toggleAvailability"
-                />
-            </div>
+  <DashboardLayout role="owner">
+    <div class="space-y-6">
+      <div class="flex items-start justify-between">
+        <div>
+          <h1 class="font-heading text-3xl font-bold text-foreground">Menu Management</h1>
+          <p class="mt-1 text-sm text-muted-foreground">Add, edit, or remove menu items</p>
         </div>
-    </DashboardLayout>
+
+        <button class="rounded-lg bg-primary px-4 py-2 text-white" @click="openCreate">
+          + Add Item
+        </button>
+      </div>
+
+      <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <OwnerMenuItemCard
+          v-for="item in menuItems"
+          :key="item.id"
+          :item="item"
+          @edit="openEdit"
+          @delete="deleteItem"
+          @toggle-availability="toggleAvailability"
+        />
+      </div>
+    </div>
+
+    <OwnerEditModal
+      v-if="showEditModal"
+      :item="selectedItem"
+      @close="closeEditModal"
+      @save="saveItem"
+    />
+  </DashboardLayout>
 </template>
+
 <script setup>
+import { ref } from 'vue'
+
 import DashboardLayout from '@/components/DashboardLayout.vue'
+import OwnerEditModal from '@/components/OwnerEditModal.vue'
 import OwnerMenuItemCard from '@/components/OwnerMenuItemCard.vue'
 import { mockMenuItems } from '@/data/mock-data'
 
-const menuItems = mockMenuItems
+const menuItems = ref(mockMenuItems.map((item) => ({ ...item })))
+const selectedItem = ref(null)
+const showEditModal = ref(false)
+
+function openCreate() {
+  selectedItem.value = null
+  showEditModal.value = true
+}
+
 function openEdit(item) {
-  console.log('edit', item)
+  selectedItem.value = { ...item }
+  showEditModal.value = true
+}
+
+function closeEditModal() {
+  selectedItem.value = null
+  showEditModal.value = false
+}
+
+function saveItem(updatedItem) {
+  if (selectedItem.value) {
+    menuItems.value = menuItems.value.map((item) =>
+      item.id === updatedItem.id ? { ...item, ...updatedItem } : item
+    )
+  } else {
+    menuItems.value = [
+      ...menuItems.value,
+      {
+        ...updatedItem,
+        id: Date.now(),
+      },
+    ]
+  }
+
+  closeEditModal()
 }
 
 function deleteItem(item) {
-  console.log('delete', item)
+  menuItems.value = menuItems.value.filter((menuItem) => menuItem.id !== item.id)
 }
 
 function toggleAvailability(item) {
-  console.log('toggle availability', item)
+  menuItems.value = menuItems.value.map((menuItem) =>
+    menuItem.id === item.id
+      ? { ...menuItem, is_available: !menuItem.is_available }
+      : menuItem
+  )
 }
-//   const [items, setItems] = useState<MenuItem>(mockMenuItems);
-//   const [editItem, setEditItem] = useState<MenuItem | null>(null);
-//   const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-//   const [form, setForm] = useState({ name: '', description: '', price: '', category: 'Mains', is_available: true });
-
-//   const openNew = () => {
-//     setEditItem(null);
-//     setForm({ name: '', description: '', price: '', category: 'Mains', is_available: true });
-//     setIsDialogOpen(true);
-//   };
-
-//   const openEdit = (item) => {
-//     setEditItem(item);
-//     setForm({ name: item.name, description: item.description, price: item.price.toString(), category: item.category, is_available: item.is_available });
-//     setIsDialogOpen(true);
-//   };
-
-//   const save = () => {
-//     if (!form.name || !form.price) { toast.error('Name and price required'); return; }
-//     if (editItem) {
-//       setItems(prev => prev.map(i => i.id === editItem.id ? { ...i, ...form, price: parseFloat(form.price) } : i));
-//       toast.success('Menu item updated');
-//     } else {
-//       const newItem = { id: `new-${Date.now()}`, ...form, price: parseFloat(form.price) };
-//       setItems(prev => [...prev, newItem]);
-//       toast.success('Menu item created');
-//     }
-//     setIsDialogOpen(false);
-//   };
-
-//   const deleteItem = (id) => {
-//     setItems(prev => prev.filter(i => i.id !== id));
-//     toast.success('Menu item deleted');
-//   };
-
-//   const toggleAvailability = (id) => {
-//     setItems(prev => prev.map(i => i.id === id ? { ...i, is_available: !i.is_available } : i));
-//   };
-
-
 </script>

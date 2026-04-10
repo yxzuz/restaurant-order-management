@@ -5,10 +5,10 @@ from pydantic import BaseModel, ConfigDict
 
 
 class MenuCategory(str, Enum):
-    APPETIZER = "appetizer"
-    MAIN_COURSE = "main course"
-    DESSERT = "dessert"
-    DRINK = "drink"
+    APPETIZER = "Appetizer"
+    MAIN_COURSE = "Mains"
+    DESSERT = "Dessert"
+    DRINK = "Drink"
 
 
 class MenuItemBase(BaseModel):
