@@ -13,7 +13,7 @@
       <div class="relative z-10 h-full flex flex-col items-center justify-center text-center px-4">
         <div class="flex items-center gap-2 mb-4">
           <UtensilsCrossed class="h-8 w-8 text-orange-400" />
-          <h1 class="text-4xl md:text-5xl font-bold text-white">
+          <h1 class="font-heading text-4xl md:text-5xl font-bold text-white">
             OrderFlow
           </h1>
         </div>
@@ -39,7 +39,7 @@
 
             <component :is="role.icon" :class="['h-10 w-10 mx-auto mb-2', role.iconClass]" />
 
-            <h3 class="text-xl font-semibold">
+            <h3 class="font-heading text-2xl font-semibold">
               {{ role.title }}
             </h3>
 

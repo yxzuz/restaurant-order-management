@@ -90,6 +90,6 @@ body {
 @layer components {
   .font-heading {
     font-family: Playfair Display, serif;
-    color: #7E6F67;
+    color: #4a3a32;
   }
 }

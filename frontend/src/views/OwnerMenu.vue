@@ -1,11 +1,18 @@
 <template>
     <DashboardLayout role="owner">
         <div class="space-y-6">
-            <div>
-                <h1 class="font-heading text-3xl font-bold text-foreground">Menu Management</h1>
-                <p class="mt-1 text-sm text-muted-foreground">Add, edit, or remove menu items</p>
+            <div class="flex items-start justify-between">
+                <div>
+                    <h1 class="font-heading text-3xl font-bold text-foreground">Menu Management</h1>
+                    <p class="mt-1 text-sm text-muted-foreground">Add, edit, or remove menu items</p>
+                    
+                </div>
+                <!-- Right side (button) -->
+                <button class="px-4 py-2 bg-primary text-white rounded-lg">
+                    + Add Item
+                </button>
+                <p>dfsdfds</p>
             </div>
-
             <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 <OwnerMenuItemCard
                     v-for="item in menuItems"
