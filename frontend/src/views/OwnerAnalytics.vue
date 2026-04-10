@@ -37,8 +37,8 @@
           <svg style="width:100%; height:130px;" viewBox="0 0 400 120" preserveAspectRatio="none">
             <defs>
               <linearGradient id="ag" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#D85A30" stop-opacity="0.15"/>
-                <stop offset="100%" stop-color="#D85A30" stop-opacity="0"/>
+                <stop offset="0%" :stop-color="chartColor" stop-opacity="0.15"/>
+                <stop offset="100%" :stop-color="chartColor" stop-opacity="0"/>
               </linearGradient>
             </defs>
             <line x1="0" y1="0"   x2="400" y2="0"   stroke="var(--color-border-tertiary)" stroke-width="0.5"/>
@@ -46,7 +46,7 @@
             <line x1="0" y1="80"  x2="400" y2="80"  stroke="var(--color-border-tertiary)" stroke-width="0.5"/>
             <line x1="0" y1="119" x2="400" y2="119" stroke="var(--color-border-tertiary)" stroke-width="0.5"/>
             <path :d="chartPaths.area" fill="url(#ag)"/>
-            <path :d="chartPaths.line" fill="none" stroke="#D85A30" stroke-width="2" stroke-linecap="round"/>
+            <path :d="chartPaths.line" fill="none" :stroke="chartColor" stroke-width="2" stroke-linecap="round"/>
           </svg>
           <div style="display:flex; justify-content:space-between; margin-top:2px;">
             <span v-for="l in chartXLabels" :key="l" style="font-size:11px; color:var(--color-text-tertiary);">{{ l }}</span>
@@ -84,7 +84,7 @@
         <div v-for="b in volumeBars" :key="b.label" style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px;">
           <span style="font-size:11px; color:var(--color-text-tertiary);">{{ b.val }}</span>
           <div style="width:100%; background:var(--color-background-secondary); border-radius:4px; height:72px; display:flex; align-items:flex-end; overflow:hidden;">
-            <div :style="{ height: Math.round(b.val / b.max * 100) + '%' }" style="width:100%; background:#D85A30; border-radius:4px 4px 0 0; opacity:0.85;" />
+            <div :style="{ height: Math.round(b.val / b.max * 100) + '%', background: chartColor }" style="width:100%; border-radius:4px 4px 0 0; opacity:0.85;" />
           </div>
           <span style="font-size:11px; color:var(--color-text-tertiary);">{{ b.label }}</span>
         </div>
@@ -112,6 +112,7 @@ const tabs = [
   { key: 'month', label: 'This month' },
 ]
 const currentTab = ref('today')
+const chartColor = 'hsl(var(--primary))'
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -265,7 +266,7 @@ const STATUS_COLORS = {
   Preparing: '#BA7517',
   Ready:     '#185FA5',
   Cancelled: '#E24B4A',
-  New:       '#D85A30',
+  New:       'hsl(var(--primary))',
 }
 
 const activeStatus = computed(() => {
