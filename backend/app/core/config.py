@@ -23,8 +23,8 @@ class Settings(BaseSettings):
         "http://localhost:3000", "http://localhost:5173"]
 
     # Database
-    DATABASE_URL: str = "sqlite:///./restaurant.db"
-    
+    DATABASE_URL: str = "postgresql://postgres@localhost/restaurant_db"
+
     # Security settings
     SECRET_KEY: SecretStr
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
@@ -32,10 +32,14 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
 
     # AWS S3
-    AWS_REGION: str = Field(default="ap-southeast-1", validation_alias=AliasChoices("AWS_REGION", "BUCKET_REGION"))
-    AWS_S3_BUCKET: str = Field(validation_alias=AliasChoices("AWS_S3_BUCKET", "BUCKET_NAME"))
-    AWS_ACCESS_KEY_ID: SecretStr = Field(validation_alias=AliasChoices("AWS_ACCESS_KEY_ID", "ACCESS_KEY"))
-    AWS_SECRET_ACCESS_KEY: SecretStr = Field(validation_alias=AliasChoices("AWS_SECRET_ACCESS_KEY", "SECRET_ACCESS_KEY"))
+    AWS_REGION: str = Field(default="ap-southeast-1",
+                            validation_alias=AliasChoices("AWS_REGION", "BUCKET_REGION"))
+    AWS_S3_BUCKET: str = Field(
+        validation_alias=AliasChoices("AWS_S3_BUCKET", "BUCKET_NAME"))
+    AWS_ACCESS_KEY_ID: SecretStr = Field(
+        validation_alias=AliasChoices("AWS_ACCESS_KEY_ID", "ACCESS_KEY"))
+    AWS_SECRET_ACCESS_KEY: SecretStr = Field(
+        validation_alias=AliasChoices("AWS_SECRET_ACCESS_KEY", "SECRET_ACCESS_KEY"))
 
 
 settings = Settings()
