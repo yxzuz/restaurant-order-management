@@ -45,7 +45,7 @@ def get_analytics(
 ):
     """Get comprehensive analytics dashboard data (owner only)"""
     report_service = ReportService(db)
-    
+
     return {
         "overall_stats": report_service.get_overall_stats(),
         "daily_sales": report_service.get_daily_sales_summary(days=7),

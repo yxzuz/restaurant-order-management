@@ -25,7 +25,8 @@ class Order(Base):
     __tablename__ = "orders"
 
     id = Column(Integer, primary_key=True, index=True)
-    table_id = Column(Integer, ForeignKey("tables.id"), nullable=False, index=True)
+    table_id = Column(Integer, ForeignKey("tables.id"),
+                      nullable=False, index=True)
     status = Column(
         SQLEnum(OrderStatus, name="order_status"),
         nullable=False,
@@ -37,7 +38,8 @@ class Order(Base):
         default=PaymentStatus.UNPAID,
     )
     created_at = Column(DateTime, nullable=False, default=now_thai)
-    updated_at = Column(DateTime, nullable=False, default=now_thai, onupdate=now_thai)
+    updated_at = Column(DateTime, nullable=False,
+                        default=now_thai, onupdate=now_thai)
     closed_at = Column(DateTime)
 
     table = relationship("Table", back_populates="orders")

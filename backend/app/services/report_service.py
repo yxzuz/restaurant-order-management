@@ -68,7 +68,8 @@ class ReportService:
         )
 
         # Average order value (from paid orders)
-        avg_order_value = float(total_revenue) / paid_orders if paid_orders > 0 else 0
+        avg_order_value = float(total_revenue) / \
+            paid_orders if paid_orders > 0 else 0
 
         return {
             'total_revenue': float(total_revenue),
