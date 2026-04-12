@@ -14,6 +14,7 @@ class MenuCategory(str, Enum):
 class MenuItemBase(BaseModel):
     name: str
     price: Decimal
+    description: str | None = None
     is_available: bool = True
     category: MenuCategory
 
@@ -25,6 +26,7 @@ class MenuItemCreate(MenuItemBase):
 class MenuItemUpdate(BaseModel):
     name: str | None = None
     price: Decimal | None = None
+    description: str | None = None
     is_available: bool | None = None
     category: MenuCategory | None = None
     image_url: str | None = None

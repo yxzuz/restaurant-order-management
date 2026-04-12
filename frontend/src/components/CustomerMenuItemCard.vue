@@ -3,7 +3,7 @@
     class="overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition hover:shadow-lg"
     :class="{ 'opacity-60': !item.is_available }"
   >
-    <div class="aspect-[4/3] overflow-hidden bg-muted">
+    <div class="aspect-video overflow-hidden bg-muted">
       <img
         :src="item.image_url || fallbackImage"
         :alt="item.name"
@@ -13,10 +13,13 @@
 
     <div class="space-y-4 p-4">
       <div>
-        <div class="flex items-center gap-2">
-          <h3 class="truncate font-heading text-lg font-semibold text-foreground">
+        <div class="flex items-center gap-2 flex-wrap">
+          <h3 class="font-heading text-lg font-semibold text-foreground">
             {{ item.name }}
           </h3>
+          <span :class="categoryBadgeClass">
+            {{ item.category }}
+          </span>
           <span
             v-if="!item.is_available"
             class="rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive"
@@ -25,15 +28,14 @@
           </span>
         </div>
 
-        <CardDescription class="mt-2 leading-6">
+        <p class="mt-2 text-sm text-muted-foreground leading-relaxed">
           {{ item.description }}
-        </CardDescription>
+        </p>
       </div>
 
       <div class="flex items-center justify-between border-t border-border pt-3">
         <div>
-          <p class="text-xs uppercase tracking-[0.2em] text-muted-foreground">{{ item.category }}</p>
-          <p class="mt-1 text-lg font-semibold text-foreground">฿{{ item.price }}</p>
+          <p class="text-lg font-semibold text-foreground">฿{{ item.price }}</p>
         </div>
 
         <div
@@ -70,12 +72,12 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { Minus, Plus } from 'lucide-vue-next'
 
 import fallbackImage from '@/assets/hero-restaurant.jpg'
-import CardDescription from '@/components/ui/CardDescription.vue'
 
-defineProps({
+const props = defineProps({
   item: {
     type: Object,
     required: true,
@@ -87,4 +89,20 @@ defineProps({
 })
 
 defineEmits(['add', 'remove'])
+
+const categoryBadgeClass = computed(() => {
+  const category = props.item.category?.toLowerCase() || ''
+  const baseClass = 'rounded-full px-2.5 py-0.5 text-xs font-medium '
+  
+  if (category.includes('appetizer')) {
+    return baseClass + 'bg-green-100 text-green-700'
+  } else if (category.includes('main')) {
+    return baseClass + 'bg-orange-100 text-orange-700'
+  } else if (category.includes('dessert')) {
+    return baseClass + 'bg-pink-100 text-pink-700'
+  } else if (category.includes('drink')) {
+    return baseClass + 'bg-blue-100 text-blue-700'
+  }
+  return baseClass + 'bg-gray-100 text-gray-700'
+})
 </script>

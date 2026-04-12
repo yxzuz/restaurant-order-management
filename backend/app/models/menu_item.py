@@ -10,6 +10,7 @@ class MenuItem(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False, index=True)
     price = Column(Numeric(10, 2), nullable=False)
+    description = Column(String, nullable=True)
     is_available = Column(Boolean, nullable=False, default=True)
     category = Column(String, nullable=False, default="main_course")
     image_url = Column(String, nullable=True)
