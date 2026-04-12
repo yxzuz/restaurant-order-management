@@ -66,6 +66,7 @@ import {
   ClipboardList,
   UtensilsCrossed,
   BarChart3,
+  Users,
   LogOut,
   PanelLeftClose,
   PanelLeftOpen,
@@ -95,6 +96,7 @@ const ownerItems = [
   { title: 'Dashboard', url: '/owner/dashboard', icon: LayoutDashboard },
   { title: 'Orders', url: '/owner/orders', icon: ClipboardList },
   { title: 'Menu', url: '/owner/menu', icon: UtensilsCrossed },
+  { title: 'Staff', url: '/owner/staff', icon: Users },
   { title: 'Analytics', url: '/owner/analytics', icon: BarChart3 },
 ]
 

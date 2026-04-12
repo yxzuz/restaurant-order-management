@@ -204,6 +204,7 @@ const previewImage = ref('')
 const selectedFileName = ref('')
 const categoryOptions = ref([])
 const categoryError = ref('')
+const selectedImageFile = ref(null)
 let objectUrl = null
 
 watch(
@@ -212,6 +213,7 @@ watch(
     Object.assign(form, createForm(item))
     resetPreviewState()
     previewImage.value = item?.image_url ?? ''
+    selectedImageFile.value = null
   },
   { immediate: true }
 )
@@ -275,12 +277,14 @@ function applyImageFile(file) {
   objectUrl = URL.createObjectURL(file)
   previewImage.value = objectUrl
   selectedFileName.value = file.name
+  selectedImageFile.value = file
   form.image_url = objectUrl
 }
 
 function resetPreviewState() {
   clearObjectUrl()
   selectedFileName.value = ''
+  selectedImageFile.value = null
 }
 
 function clearObjectUrl() {
@@ -302,6 +306,7 @@ function handleSubmit() {
     price: Number(form.price),
     category: form.category.trim(),
     image_url: form.image_url.trim(),
+    imageFile: selectedImageFile.value,
     is_available: form.is_available,
   })
 }

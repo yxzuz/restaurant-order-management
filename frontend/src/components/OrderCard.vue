@@ -37,7 +37,7 @@
               </p>
               <p class="text-xs text-muted-foreground">Qty {{ item.quantity }}</p>
             </div>
-            <p class="text-sm font-semibold text-foreground">${{ Number(item.subtotal).toFixed(2) }}</p>
+            <p class="text-sm font-semibold text-foreground">${{ getOrderItemSubtotal(item).toFixed(2) }}</p>
           </div>
         </div>
       </div>
@@ -60,13 +60,13 @@
           {{ nextStatusAction }}
         </button>
         <span
-          v-if="order.status === 'Completed'"
+          v-if="normalizedStatus === 'completed'"
           class="rounded-xl border border-border bg-muted px-4 py-2 text-sm font-medium text-muted-foreground"
         >
           Order Complete
         </span>
         <span
-          v-if="order.status === 'Cancelled'"
+          v-if="normalizedStatus === 'cancelled'"
           class="rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-2 text-sm font-medium text-destructive"
         >
           Order Cancelled
@@ -80,6 +80,7 @@
 import { computed } from 'vue'
 
 import StatusBadge from '@/components/ui/StatusBadge.vue'
+import { getOrderItemSubtotal } from '@/services/owner'
 
 const props = defineProps({
   order: {
@@ -91,7 +92,8 @@ const props = defineProps({
 defineEmits(['advance-status', 'cancel-order'])
 
 const totalAmount = computed(() => Number(props.order.total_amount).toFixed(2))
-const canCancel = computed(() => props.order.status === 'New')
+const normalizedStatus = computed(() => String(props.order.status || '').toLowerCase())
+const canCancel = computed(() => normalizedStatus.value === 'new')
 
 const formattedTime = computed(() => {
   const createdAt = new Date(props.order.created_at)
@@ -109,12 +111,12 @@ const formattedTime = computed(() => {
 
 const nextStatusAction = computed(() => {
   const statusActions = {
-    New: 'Mark Preparing',
-    Preparing: 'Mark Ready',
-    Ready: 'Mark Complete',
+    new: 'Mark Preparing',
+    preparing: 'Mark Ready',
+    ready: 'Mark Complete',
   }
 
-  return statusActions[props.order.status] || ''
+  return statusActions[normalizedStatus.value] || ''
 })
 
 const timeAgo = computed(() => {

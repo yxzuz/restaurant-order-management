@@ -44,6 +44,16 @@ class AuthService:
             role=UserRole.STAFF,
         )
 
+    def delete_staff(self, user_id: int) -> bool:
+        user = self.user_repository.get_by_id(user_id)
+        if user is None:
+            return False
+        if user.role != UserRole.STAFF:
+            raise ValueError("Only staff accounts can be deleted")
+
+        self.user_repository.delete(user)
+        return True
+
     def login(self, payload: LoginRequest) -> str:
         user = self.user_repository.get_by_username(payload.username)
         if user is None or not bcrypt_context.verify(payload.password, user.hashed_password):

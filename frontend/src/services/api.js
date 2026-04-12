@@ -27,6 +27,16 @@ api.interceptors.response.use(
   (response) => response.data,
   (error) => {
     console.error('API Error:', error)
+
+    if (error?.response?.status === 401 || error?.response?.status === 403) {
+      localStorage.removeItem('token')
+      localStorage.removeItem('user_role')
+
+      if (window.location.pathname !== '/') {
+        window.location.href = '/'
+      }
+    }
+
     return Promise.reject(error)
   }
 )

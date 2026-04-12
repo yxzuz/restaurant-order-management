@@ -8,6 +8,15 @@
         </div>
       </div>
 
+      <p
+        v-if="errorMessage"
+        class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+      >
+        {{ errorMessage }}
+      </p>
+
+      <p v-if="loading" class="text-sm text-muted-foreground">Loading orders...</p>
+
       <div class="grid gap-4">
         <OrderCard
           v-for="order in orders"
@@ -22,42 +31,73 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 
 import DashboardLayout from '@/components/DashboardLayout.vue'
 import OrderCard from '@/components/OrderCard.vue'
-import { mockOrders } from '@/data/mock-data'
+import { fetchOwnerOrders, updateOrderStatus } from '@/services/owner'
 
-const orders = ref(mockOrders.map((order) => ({ ...order, items: order.items.map((item) => ({ ...item })) })))
+const orders = ref([])
+const loading = ref(false)
+const errorMessage = ref('')
 
 const nextStatusMap = {
-  New: 'Preparing',
-  Preparing: 'Ready',
-  Ready: 'Completed',
+  new: 'preparing',
+  preparing: 'ready',
+  ready: 'completed',
 }
 
-function advanceStatus(order) {
-  const nextStatus = nextStatusMap[order.status]
+onMounted(() => {
+  loadOrders()
+})
+
+async function loadOrders() {
+  loading.value = true
+  errorMessage.value = ''
+
+  try {
+    orders.value = await fetchOwnerOrders()
+  } catch (error) {
+    errorMessage.value = error?.response?.data?.detail || 'Could not load orders.'
+  } finally {
+    loading.value = false
+  }
+}
+
+async function advanceStatus(order) {
+  const nextStatus = nextStatusMap[String(order.status).toLowerCase()]
   if (!nextStatus) {
     return
   }
 
-  orders.value = orders.value.map((currentOrder) =>
-    currentOrder.id === order.id
-      ? { ...currentOrder, status: nextStatus }
-      : currentOrder
-  )
+  errorMessage.value = ''
+
+  try {
+    const updatedOrder = await updateOrderStatus(order.id, nextStatus)
+    upsertOrder(updatedOrder)
+  } catch (error) {
+    errorMessage.value = error?.response?.data?.detail || 'Could not update order status.'
+  }
 }
 
-function cancelOrder(order) {
-  if (order.status !== 'New') {
+async function cancelOrder(order) {
+  if (String(order.status).toLowerCase() !== 'new') {
     return
   }
 
+  errorMessage.value = ''
+
+  try {
+    const updatedOrder = await updateOrderStatus(order.id, 'cancelled')
+    upsertOrder(updatedOrder)
+  } catch (error) {
+    errorMessage.value = error?.response?.data?.detail || 'Could not cancel order.'
+  }
+}
+
+function upsertOrder(updatedOrder) {
   orders.value = orders.value.map((currentOrder) =>
-    currentOrder.id === order.id
-      ? { ...currentOrder, status: 'Cancelled' }
-      : currentOrder
+    currentOrder.id === updatedOrder.id ? updatedOrder : currentOrder
   )
 }
 </script>

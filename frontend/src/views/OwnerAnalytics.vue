@@ -95,17 +95,17 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { Clock3, DollarSign, ShoppingBag, Timer } from 'lucide-vue-next'
 import DashboardLayout from '@/components/DashboardLayout.vue'
 import StatCard from '@/components/ui/StatCard.vue'
-import { mockOrders } from '@/data/mock-data'
+import { fetchOwnerOrders } from '@/services/owner'
 
 const props = defineProps({
   orders: { type: Array, default: () => [] },
 })
 
-const sourceOrders = computed(() => (props.orders.length ? props.orders : mockOrders))
+const fetchedOrders = ref([])
 
 const tabs = [
   { key: 'today', label: 'Today' },
@@ -113,6 +113,13 @@ const tabs = [
 ]
 const currentTab = ref('today')
 const chartColor = 'hsl(var(--primary))'
+const sourceOrders = computed(() => (props.orders.length ? props.orders : fetchedOrders.value))
+
+onMounted(() => {
+  if (!props.orders.length) {
+    loadOrders()
+  }
+})
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -149,6 +156,14 @@ function pctDelta(curr, prev) {
   if (prev === 0) return { str: 'N/A', up: true }
   const p = Math.round(((curr - prev) / prev) * 100)
   return { str: (p >= 0 ? '+' : '') + p + '%', up: p >= 0 }
+}
+
+async function loadOrders() {
+  try {
+    fetchedOrders.value = await fetchOwnerOrders()
+  } catch {
+    fetchedOrders.value = []
+  }
 }
 
 // ── filtered order sets ───────────────────────────────────────────────────────
@@ -262,19 +277,24 @@ const chartPaths = computed(() => {
 // ── status breakdown ──────────────────────────────────────────────────────────
 
 const STATUS_COLORS = {
-  Completed: '#639922',
-  Preparing: '#BA7517',
-  Ready:     '#185FA5',
-  Cancelled: '#E24B4A',
-  New:       'hsl(var(--primary))',
+  completed: '#639922',
+  preparing: '#BA7517',
+  ready: '#185FA5',
+  cancelled: '#E24B4A',
+  new: 'hsl(var(--primary))',
 }
 
 const activeStatus = computed(() => {
   const total = currentOrders.value.length || 1
   return Object.entries(STATUS_COLORS)
     .map(([label, color]) => {
-      const val = currentOrders.value.filter(o => o.status === label).length
-      return { label, color, val, pct: Math.round((val / total) * 100) }
+      const val = currentOrders.value.filter(o => String(o.status).toLowerCase() === label).length
+      return {
+        label: label.charAt(0).toUpperCase() + label.slice(1),
+        color,
+        val,
+        pct: Math.round((val / total) * 100),
+      }
     })
     .filter(s => s.val > 0)
 })

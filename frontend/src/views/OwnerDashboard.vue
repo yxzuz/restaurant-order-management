@@ -6,6 +6,13 @@
         <p class="mt-1 text-sm text-muted-foreground">Overview of today's operations</p>
       </div>
 
+      <p
+        v-if="errorMessage"
+        class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+      >
+        {{ errorMessage }}
+      </p>
+
       <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           v-for="stat in stats"
@@ -63,42 +70,80 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { DollarSign, ShoppingBag, Clock, TrendingUp } from 'lucide-vue-next'
 
 import DashboardLayout from '@/components/DashboardLayout.vue'
 import PanelCard from '@/components/ui/PanelCard.vue'
 import StatCard from '@/components/ui/StatCard.vue'
 import StatusBadge from '@/components/ui/StatusBadge.vue'
-import { mockOrders, mockMenuItems } from '@/data/mock-data'
+import { fetchOwnerMenuItems, fetchOwnerOrders } from '@/services/owner'
 
-const stats = [
+const orders = ref([])
+const menuItems = ref([])
+const errorMessage = ref('')
+
+onMounted(() => {
+  loadDashboard()
+})
+
+const stats = computed(() => [
   {
     title: 'Total Revenue',
-    value: `$${mockOrders.reduce((s, o) => s + o.total_amount, 0).toFixed(2)}`,
+    value: `$${orders.value.reduce((sum, order) => sum + Number(order.total_amount), 0).toFixed(2)}`,
     icon: DollarSign,
     description: "Today's earnings",
   },
   {
     title: 'Active Orders',
-    value: mockOrders.filter(o => !['Completed', 'Cancelled'].includes(o.status)).length,
+    value: orders.value.filter((order) => !['completed', 'cancelled'].includes(String(order.status).toLowerCase())).length,
     icon: Clock,
     description: 'Currently in progress',
   },
   {
     title: 'Total Orders',
-    value: mockOrders.length,
+    value: orders.value.length,
     icon: ShoppingBag,
     description: 'Orders today',
   },
   {
     title: 'Menu Items',
-    value: mockMenuItems.filter(i => i.is_available).length,
+    value: menuItems.value.filter((item) => item.is_available).length,
     icon: TrendingUp,
     description: 'Items available',
   },
-]
+])
 
-const recentOrders = computed(() => mockOrders.slice(0, 5))
-const popularItems = computed(() => mockMenuItems.slice(0, 5))
+const recentOrders = computed(() => orders.value.slice(0, 5))
+
+const popularItems = computed(() => {
+  const sales = {}
+
+  orders.value.forEach((order) => {
+    order.items.forEach((item) => {
+      const name = item.menu_item?.name || 'Menu item'
+      sales[name] = (sales[name] || 0) + Number(item.quantity)
+    })
+  })
+
+  return [...menuItems.value]
+    .sort((a, b) => (sales[b.name] || 0) - (sales[a.name] || 0))
+    .slice(0, 5)
+})
+
+async function loadDashboard() {
+  errorMessage.value = ''
+
+  try {
+    const [loadedOrders, loadedMenuItems] = await Promise.all([
+      fetchOwnerOrders(),
+      fetchOwnerMenuItems(),
+    ])
+
+    orders.value = loadedOrders
+    menuItems.value = loadedMenuItems
+  } catch (error) {
+    errorMessage.value = error?.response?.data?.detail || 'Could not load dashboard data.'
+  }
+}
 </script>
