@@ -835,6 +835,11 @@ describe("OrderCard", () => {
 
 ### Common Issues
 
+**Problem:** "Username must be at least 3 characters long" or "Password must be at least 4 characters long"
+
+- **Cause:** Login credentials are too short
+- **Solution:** Use username with 3+ characters and password with 4+ characters. Demo account: username `owner`, password `password123`
+
 **Problem:** "Token has expired" error
 
 - **Cause:** JWT token expires after 30 minutes

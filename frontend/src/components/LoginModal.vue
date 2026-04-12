@@ -154,6 +154,13 @@ async function handleLogin() {
   } catch (error) {
     const status = error?.response?.status
     const detail = error?.response?.data?.detail
+    const validationMessage = error?.response?.data?.message
+
+    // Handle validation errors (400 with friendly message)
+    if (status === 400 && validationMessage) {
+      errorMessage.value = validationMessage
+      return
+    }
 
     if (status === 400 && props.requiredRole === 'owner' && mode.value === 'create') {
       if (typeof detail === 'string' && detail.toLowerCase().includes('already exists')) {

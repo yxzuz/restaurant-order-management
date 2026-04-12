@@ -165,7 +165,9 @@ async function submitStaff() {
     successMessage.value = 'Staff account created.'
     await loadUsers()
   } catch (error) {
-    errorMessage.value = error?.response?.data?.detail || 'Could not create staff account.'
+    const validationMessage = error?.response?.data?.message
+    const detail = error?.response?.data?.detail
+    errorMessage.value = validationMessage || detail || 'Could not create staff account.'
   } finally {
     submitting.value = false
   }
