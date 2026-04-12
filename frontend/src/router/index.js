@@ -8,6 +8,16 @@ const routes = [
     component: Home,
   },
   {
+    path: '/customer',
+    name: 'CustomerAccess',
+    component: () => import('@/views/CustomerAccess.vue'),
+  },
+  {
+    path: '/table/:tableNumber',
+    name: 'CustomerPage',
+    component: () => import('@/views/CustomerPage.vue'),
+  },
+  {
     path: '/owner/dashboard',
     component: () => import('@/views/OwnerDashboard.vue'),
     meta: { requiresAuth: true, requiredRole: 'owner' },
@@ -31,6 +41,21 @@ const routes = [
     path: '/owner/analytics',
     component: () => import('@/views/OwnerAnalytics.vue'),
     meta: { requiresAuth: true, requiredRole: 'owner' },
+  },
+  {
+    path: '/owner/tables',
+    component: () => import('@/views/OwnerTables.vue'),
+    meta: { requiresAuth: true, requiredRole: 'owner' },
+  },
+  {
+    path: '/staff/orders',
+    component: () => import('@/views/OwnerOrder.vue'),
+    meta: { requiresAuth: true, requiredRole: 'staff' },
+  },
+  {
+    path: '/staff/menu',
+    component: () => import('@/views/OwnerMenu.vue'),
+    meta: { requiresAuth: true, requiredRole: 'staff' },
   },
 ]
 

@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi import File, Form, UploadFile
 from sqlalchemy.orm import Session
 
-from app.api.dependencies.auth import require_owner
+from app.api.dependencies.auth import require_owner, require_staff_or_owner
 from app.db import get_db
 from app.schemas.menu_item import MenuCategory, MenuItemRead
 from app.services.menu_service import MenuService
@@ -69,7 +69,7 @@ def update_menu_item(
     is_available: bool | None = Form(None),
     image: UploadFile | None = File(None),
     db: Session = Depends(get_db),
-    _current_user=Depends(require_owner),
+    _current_user=Depends(require_staff_or_owner),
 ):
     service = MenuService(db)
     changes = {}

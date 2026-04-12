@@ -67,6 +67,7 @@ import {
   UtensilsCrossed,
   BarChart3,
   Users,
+  Table2,
   LogOut,
   PanelLeftClose,
   PanelLeftOpen,
@@ -90,6 +91,7 @@ const router = useRouter()
 
 const staffItems = [
   { title: 'Orders', url: '/staff/orders', icon: ClipboardList },
+  { title: 'Menu', url: '/staff/menu', icon: UtensilsCrossed },
 ]
 
 const ownerItems = [
@@ -97,6 +99,7 @@ const ownerItems = [
   { title: 'Orders', url: '/owner/orders', icon: ClipboardList },
   { title: 'Menu', url: '/owner/menu', icon: UtensilsCrossed },
   { title: 'Staff', url: '/owner/staff', icon: Users },
+  { title: 'Tables', url: '/owner/tables', icon: Table2 },
   { title: 'Analytics', url: '/owner/analytics', icon: BarChart3 },
 ]
 
@@ -110,6 +113,7 @@ function isActive(path) {
 
 function logout() {
   localStorage.removeItem('token')
+  localStorage.removeItem('user_role')
   router.push('/')
 }
 </script>

@@ -36,6 +36,10 @@ class TableRepository:
         self.db.refresh(table)
         return table
 
+    def delete(self, table: Table) -> None:
+        self.db.delete(table)
+        self.db.commit()
+
     def update_status(self, table: Table, status: TableStatus) -> Table:
         table.status = status
         self.db.commit()

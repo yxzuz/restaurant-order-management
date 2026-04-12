@@ -1,5 +1,12 @@
 import api from '@/services/api'
 
+function ownerAuthConfig() {
+  const token = localStorage.getItem('token')
+  return token
+    ? { headers: { Authorization: `Bearer ${token}` } }
+    : {}
+}
+
 export function normalizeMenuItem(item) {
   return {
     ...item,
@@ -43,42 +50,49 @@ export function normalizeOrder(order) {
 }
 
 export async function fetchOwnerOrders() {
-  const orders = await api.get('/orders')
+  const orders = await api.get('/orders/')
   return Array.isArray(orders) ? orders.map(normalizeOrder) : []
 }
 
 export async function fetchOwnerMenuItems() {
-  const menuItems = await api.get('/menus')
+  const menuItems = await api.get('/menus/')
   return Array.isArray(menuItems) ? menuItems.map(normalizeMenuItem) : []
 }
 
 export async function updateOrderStatus(orderId, status) {
-  const order = await api.patch(`/orders/${orderId}/status`, { status })
+  const order = await api.patch(`/orders/${orderId}/status`, { status }, ownerAuthConfig())
+  return normalizeOrder(order)
+}
+
+export async function updateOrderPayment(orderId, paymentStatus) {
+  const order = await api.patch(`/orders/${orderId}/payment`, { payment_status: paymentStatus }, ownerAuthConfig())
+  return normalizeOrder(order)
+}
+
+export async function updateOrderItemStatus(orderId, itemId, status) {
+  const order = await api.patch(`/orders/${orderId}/items/${itemId}/status`, { status }, ownerAuthConfig())
+  return normalizeOrder(order)
+}
+
+export async function cancelOrderItem(orderId, itemId) {
+  const order = await api.delete(`/orders/${orderId}/items/${itemId}`, ownerAuthConfig())
   return normalizeOrder(order)
 }
 
 export async function deleteMenuItem(itemId) {
-  await api.delete(`/menus/${itemId}`)
+  await api.delete(`/menus/${itemId}`, ownerAuthConfig())
 }
 
 export async function createMenuItem(payload) {
   const formData = buildMenuItemFormData(payload)
-  const item = await api.post('/menus', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  })
+  const item = await api.post('/menus/', formData, ownerAuthConfig())
 
   return normalizeMenuItem(item)
 }
 
 export async function updateMenuItem(itemId, payload) {
   const formData = buildMenuItemFormData(payload)
-  const item = await api.patch(`/menus/${itemId}`, formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  })
+  const item = await api.patch(`/menus/${itemId}`, formData, ownerAuthConfig())
 
   return normalizeMenuItem(item)
 }
@@ -88,12 +102,30 @@ export async function fetchUsers() {
   return Array.isArray(users) ? users : []
 }
 
+export async function fetchTableAccessLinks() {
+  const tables = await api.get('/tables/access-links', ownerAuthConfig())
+  return Array.isArray(tables)
+    ? tables.map((table) => ({
+        ...table,
+        number: Number(table.number ?? 0),
+      }))
+    : []
+}
+
+export async function createTable(number) {
+  return api.post('/tables/', { number }, ownerAuthConfig())
+}
+
+export async function deleteTable(tableNumber) {
+  await api.delete(`/tables/${tableNumber}`, ownerAuthConfig())
+}
+
 export async function createStaff(payload) {
-  return api.post('/auth/staff', payload)
+  return api.post('/auth/staff', payload, ownerAuthConfig())
 }
 
 export async function deleteStaff(userId) {
-  await api.delete(`/auth/staff/${userId}`)
+  await api.delete(`/auth/staff/${userId}`, ownerAuthConfig())
 }
 
 function buildMenuItemFormData(payload) {

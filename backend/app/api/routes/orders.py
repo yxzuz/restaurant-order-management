@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.db import get_db
 from app.schemas.order import OrderCreate, OrderPaymentUpdate, OrderRead, OrderUpdate
+from app.schemas.order_item import OrderItemStatusUpdate
 from app.services.order_service import OrderService
 
 router = APIRouter()
@@ -25,7 +26,8 @@ def get_order(order_id: int, db: Session = Depends(get_db)):
     service = OrderService(db)
     order = service.get_order(order_id)
     if order is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
     return order
 
 
@@ -35,11 +37,14 @@ def create_order(payload: OrderCreate, db: Session = Depends(get_db)):
     try:
         return service.create_order(payload.model_dump())
     except LookupError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
     except PermissionError as exc:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
     except ValueError as exc:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
 
 
 @router.patch("/{order_id}/status", response_model=OrderRead)
@@ -54,9 +59,11 @@ def update_order_status(order_id: int, payload: OrderUpdate, db: Session = Depen
     try:
         order = service.update_order_status(order_id, payload.status)
     except ValueError as exc:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
     if order is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
     return order
 
 
@@ -66,9 +73,40 @@ def update_order_payment(order_id: int, payload: OrderPaymentUpdate, db: Session
     try:
         order = service.update_payment_status(order_id, payload.payment_status)
     except ValueError as exc:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
     if order is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
+    return order
+
+
+@router.patch("/{order_id}/items/{item_id}/status", response_model=OrderRead)
+def update_order_item_status(order_id: int, item_id: int, payload: OrderItemStatusUpdate, db: Session = Depends(get_db)):
+    service = OrderService(db)
+    try:
+        order = service.update_order_item_status(
+            order_id, item_id, payload.status)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+    if order is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="Order or item not found")
+    return order
+
+
+@router.delete("/{order_id}/items/{item_id}", response_model=OrderRead)
+def cancel_order_item(order_id: int, item_id: int, db: Session = Depends(get_db)):
+    service = OrderService(db)
+    try:
+        order = service.cancel_order_item(order_id, item_id)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+    if order is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="Order or item not found")
     return order
 
 
@@ -77,4 +115,5 @@ def delete_order(order_id: int, db: Session = Depends(get_db)):
     service = OrderService(db)
     deleted = service.delete_order(order_id)
     if not deleted:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")

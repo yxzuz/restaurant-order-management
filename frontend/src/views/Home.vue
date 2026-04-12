@@ -116,7 +116,7 @@ const roles = [
     icon: QrCode,
     iconClass: 'text-orange-600',
     requiredRole: null,
-    link: '/table/5?token=qr-token-5',
+    link: '/customer',
   },
   {
     title: 'Staff',

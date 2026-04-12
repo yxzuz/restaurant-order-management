@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy.orm import Session, joinedload
 
 from app.models.order import Order, OrderStatus, PaymentStatus
-from app.models.order_item import OrderItem
+from app.models.order_item import OrderItem, ItemStatus
 
 
 class OrderRepository:
@@ -17,7 +17,8 @@ class OrderRepository:
         status: OrderStatus = OrderStatus.NEW,
         payment_status: PaymentStatus = PaymentStatus.UNPAID,
     ) -> Order:
-        order = Order(table_id=table_id, status=status, payment_status=payment_status)
+        order = Order(table_id=table_id, status=status,
+                      payment_status=payment_status)
         self.db.add(order)
         self.db.commit()
         self.db.refresh(order)
@@ -60,6 +61,9 @@ class OrderRepository:
             .first()
         )
 
+    def has_orders_for_table_id(self, table_id: int) -> bool:
+        return self.db.query(Order.id).filter(Order.table_id == table_id).first() is not None
+
     def update_status(self, order: Order, status: OrderStatus) -> Order:
         order.status = status
         order.updated_at = datetime.utcnow()
@@ -98,3 +102,21 @@ class OrderRepository:
         self.db.commit()
         self.db.refresh(item)
         return item
+
+    def get_order_item(self, order_id: int, item_id: int) -> OrderItem | None:
+        return (
+            self.db.query(OrderItem)
+            .filter(OrderItem.order_id == order_id, OrderItem.id == item_id)
+            .first()
+        )
+
+    def update_item_status(self, item: OrderItem, status: ItemStatus) -> OrderItem:
+        item.status = status
+        item.updated_at = datetime.utcnow()
+        self.db.commit()
+        self.db.refresh(item)
+        return item
+
+    def delete_item(self, item: OrderItem) -> None:
+        self.db.delete(item)
+        self.db.commit()

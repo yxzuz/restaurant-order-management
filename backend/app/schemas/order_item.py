@@ -19,12 +19,17 @@ class OrderItemUpdate(BaseModel):
     quantity: int | None = Field(default=None, ge=1)
 
 
+class OrderItemStatusUpdate(BaseModel):
+    status: str
+
+
 class OrderItemRead(BaseModel):
     id: int
     order_id: int
     menu_item_id: int
     quantity: int
     unit_price: Decimal
+    status: str = "NEW"
     created_at: datetime | None = None
     updated_at: datetime | None = None
     menu_item: MenuItemRead | None = None

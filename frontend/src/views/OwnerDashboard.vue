@@ -65,6 +65,54 @@
           </div>
         </PanelCard>
       </div>
+
+      <PanelCard title="Table QR Codes" subtitle="Scan opens the direct customer ordering link">
+        <div v-if="tableLinks.length === 0" class="text-sm text-muted-foreground">
+          No table QR codes available.
+        </div>
+
+        <div v-else class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div
+            v-for="table in tableLinks"
+            :key="table.id"
+            class="rounded-3xl border border-border/70 bg-background p-4"
+          >
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-xs uppercase tracking-[0.2em] text-muted-foreground">Table</p>
+                <p class="mt-1 text-2xl font-semibold text-foreground">{{ table.number }}</p>
+              </div>
+              <StatusBadge :status="table.status" />
+            </div>
+
+            <div class="mt-4 overflow-hidden rounded-2xl border border-border bg-white p-3">
+              <img
+                :src="table.qrImage"
+                :alt="`Table ${table.number} QR code`"
+                class="mx-auto aspect-square w-full max-w-[180px]"
+              >
+            </div>
+
+            <div class="mt-4 space-y-2">
+              <button
+                type="button"
+                class="w-full rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
+                @click="copyTableLink(table)"
+              >
+                Copy link
+              </button>
+              <a
+                :href="table.orderUrl"
+                target="_blank"
+                rel="noreferrer"
+                class="block w-full rounded-xl border border-border px-4 py-2 text-center text-sm font-medium text-foreground transition hover:bg-accent"
+              >
+                Open link
+              </a>
+            </div>
+          </div>
+        </div>
+      </PanelCard>
     </div>
   </DashboardLayout>
 </template>
@@ -72,15 +120,17 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { DollarSign, ShoppingBag, Clock, TrendingUp } from 'lucide-vue-next'
+import QRCode from 'qrcode'
 
 import DashboardLayout from '@/components/DashboardLayout.vue'
 import PanelCard from '@/components/ui/PanelCard.vue'
 import StatCard from '@/components/ui/StatCard.vue'
 import StatusBadge from '@/components/ui/StatusBadge.vue'
-import { fetchOwnerMenuItems, fetchOwnerOrders } from '@/services/owner'
+import { fetchOwnerMenuItems, fetchOwnerOrders, fetchTableAccessLinks } from '@/services/owner'
 
 const orders = ref([])
 const menuItems = ref([])
+const tableLinks = ref([])
 const errorMessage = ref('')
 
 onMounted(() => {
@@ -135,15 +185,47 @@ async function loadDashboard() {
   errorMessage.value = ''
 
   try {
-    const [loadedOrders, loadedMenuItems] = await Promise.all([
+    const [loadedOrders, loadedMenuItems, loadedTables] = await Promise.all([
       fetchOwnerOrders(),
       fetchOwnerMenuItems(),
+      fetchTableAccessLinks(),
     ])
 
     orders.value = loadedOrders
     menuItems.value = loadedMenuItems
+    tableLinks.value = await Promise.all(
+      loadedTables.map(async (table) => {
+        const orderUrl = buildTableOrderUrl(table)
+        return {
+          ...table,
+          orderUrl,
+          qrImage: await QRCode.toDataURL(orderUrl, {
+            margin: 1,
+            width: 320,
+            color: {
+              dark: '#2d1f17',
+              light: '#ffffff',
+            },
+          }),
+        }
+      })
+    )
   } catch (error) {
     errorMessage.value = error?.response?.data?.detail || 'Could not load dashboard data.'
+  }
+}
+
+function buildTableOrderUrl(table) {
+  const url = new URL(`/table/${table.number}`, window.location.origin)
+  url.searchParams.set('token', table.qr_token)
+  return url.toString()
+}
+
+async function copyTableLink(table) {
+  try {
+    await navigator.clipboard.writeText(table.orderUrl)
+  } catch {
+    errorMessage.value = 'Could not copy the table link.'
   }
 }
 </script>

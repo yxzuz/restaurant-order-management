@@ -1,4 +1,5 @@
 from pydantic import BaseModel, ConfigDict
+from pydantic import Field
 
 from app.models.table import TableStatus
 
@@ -9,6 +10,14 @@ class TableRead(BaseModel):
     status: TableStatus
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class TableAccessRead(TableRead):
+    qr_token: str
+
+
+class TableCreate(BaseModel):
+    number: int = Field(..., ge=1)
 
 
 class TableAccess(BaseModel):

@@ -1,13 +1,13 @@
 <template>
-  <DashboardLayout role="owner">
+  <DashboardLayout :role="userRole">
     <div class="space-y-6">
       <div class="flex items-start justify-between">
         <div>
           <h1 class="font-heading text-3xl font-bold text-foreground">Menu Management</h1>
-          <p class="mt-1 text-sm text-muted-foreground">Add, edit, or remove menu items</p>
+          <p class="mt-1 text-sm text-muted-foreground">{{ userRole === 'owner' ? 'Add, edit, or remove menu items' : 'Manage menu availability' }}</p>
         </div>
 
-        <button class="rounded-lg bg-primary px-4 py-2 text-white" @click="openCreate">
+        <button v-if="userRole === 'owner'" class="rounded-lg bg-primary px-4 py-2 text-white" @click="openCreate">
           + Add Item
         </button>
       </div>
@@ -26,6 +26,7 @@
           v-for="item in menuItems"
           :key="item.id"
           :item="item"
+          :user-role="userRole"
           @edit="openEdit"
           @delete="deleteItem"
           @toggle-availability="toggleAvailability"
@@ -43,7 +44,8 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
 
 import DashboardLayout from '@/components/DashboardLayout.vue'
 import OwnerEditModal from '@/components/OwnerEditModal.vue'
@@ -55,11 +57,20 @@ import {
   updateMenuItem,
 } from '@/services/owner'
 
+const route = useRoute()
+
 const menuItems = ref([])
 const selectedItem = ref(null)
 const showEditModal = ref(false)
 const loading = ref(false)
 const errorMessage = ref('')
+
+// Determine role from route path
+const userRole = computed(() => {
+  if (route.path.startsWith('/staff')) return 'staff'
+  if (route.path.startsWith('/owner')) return 'owner'
+  return localStorage.getItem('user_role') || 'owner'
+})
 
 onMounted(() => {
   loadMenuItems()

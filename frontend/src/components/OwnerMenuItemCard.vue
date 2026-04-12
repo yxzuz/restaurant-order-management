@@ -25,6 +25,7 @@
               {{ item.category }}
             </p>
             <button
+              v-if="canEdit"
               type="button"
               @click="$emit('edit', item)"
               class="rounded-full border border-border p-2 text-foreground transition hover:bg-accent"
@@ -34,6 +35,7 @@
             </button>
 
             <button
+              v-if="canDelete"
               type="button"
               class="rounded-full border border-destructive/30 px-3 py-2 text-sm text-destructive transition hover:bg-destructive/10"
               @click="$emit('delete', item)"
@@ -77,17 +79,26 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { Pencil, Trash } from 'lucide-vue-next'
 
-import fallbackImage from '@/assets/hero-restaurant.jpg'
 import CardDescription from '@/components/ui/CardDescription.vue'
 
-defineProps({
+const props = defineProps({
   item: {
     type: Object,
     required: true,
   },
+  userRole: {
+    type: String,
+    default: 'owner',
+  },
 })
 
 defineEmits(['edit', 'delete', 'toggle-availability'])
+
+const canEdit = computed(() => props.userRole === 'owner')
+const canDelete = computed(() => props.userRole === 'owner')
+
+const fallbackImage = 'https://fakeimg.pl/600x400/ebebeb/999?font=bebas&text=No+Image'
 </script>

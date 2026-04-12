@@ -44,34 +44,63 @@ def _migrate_sqlite_schema():
 
     with engine.begin() as connection:
         if "users" in existing_tables:
-            user_columns = {column["name"] for column in inspector.get_columns("users")}
+            user_columns = {column["name"]
+                            for column in inspector.get_columns("users")}
             if "hashed_password" not in user_columns:
                 connection.execute(
-                    text("ALTER TABLE users ADD COLUMN hashed_password VARCHAR NOT NULL DEFAULT ''")
+                    text(
+                        "ALTER TABLE users ADD COLUMN hashed_password VARCHAR NOT NULL DEFAULT ''")
                 )
 
         if "orders" in existing_tables:
-            order_columns = {column["name"] for column in inspector.get_columns("orders")}
+            order_columns = {column["name"]
+                             for column in inspector.get_columns("orders")}
             if "table_id" not in order_columns:
-                connection.execute(text("ALTER TABLE orders ADD COLUMN table_id INTEGER"))
+                connection.execute(
+                    text("ALTER TABLE orders ADD COLUMN table_id INTEGER"))
             if "payment_status" not in order_columns:
-                connection.execute(text("ALTER TABLE orders ADD COLUMN payment_status VARCHAR(6) NOT NULL DEFAULT 'unpaid'"))
+                connection.execute(text(
+                    "ALTER TABLE orders ADD COLUMN payment_status VARCHAR(6) NOT NULL DEFAULT 'unpaid'"))
             if "closed_at" not in order_columns:
-                connection.execute(text("ALTER TABLE orders ADD COLUMN closed_at DATETIME"))
+                connection.execute(
+                    text("ALTER TABLE orders ADD COLUMN closed_at DATETIME"))
+
+        if "order_items" in existing_tables:
+            order_item_columns = {column["name"]
+                                  for column in inspector.get_columns("order_items")}
+            if "status" not in order_item_columns:
+                connection.execute(text(
+                    "ALTER TABLE order_items ADD COLUMN status VARCHAR(10) NOT NULL DEFAULT 'NEW'"))
+            else:
+                # Update existing lowercase status values to uppercase
+                connection.execute(text(
+                    "UPDATE order_items SET status = 'NEW' WHERE status = 'new'"))
+                connection.execute(text(
+                    "UPDATE order_items SET status = 'PREPARING' WHERE status = 'preparing'"))
+                connection.execute(text(
+                    "UPDATE order_items SET status = 'READY' WHERE status = 'ready'"))
+                connection.execute(text(
+                    "UPDATE order_items SET status = 'COMPLETED' WHERE status = 'completed'"))
 
         if "tables" in existing_tables:
-            table_columns = {column["name"] for column in inspector.get_columns("tables")}
+            table_columns = {column["name"]
+                             for column in inspector.get_columns("tables")}
             if "status" not in table_columns:
-                connection.execute(text("ALTER TABLE tables ADD COLUMN status VARCHAR(9) NOT NULL DEFAULT 'available'"))
+                connection.execute(text(
+                    "ALTER TABLE tables ADD COLUMN status VARCHAR(9) NOT NULL DEFAULT 'available'"))
             if "qr_token" not in table_columns:
-                connection.execute(text("ALTER TABLE tables ADD COLUMN qr_token VARCHAR(64)"))
+                connection.execute(
+                    text("ALTER TABLE tables ADD COLUMN qr_token VARCHAR(64)"))
 
         if "menu_items" in existing_tables:
-            menu_columns = {column["name"] for column in inspector.get_columns("menu_items")}
+            menu_columns = {column["name"]
+                            for column in inspector.get_columns("menu_items")}
             if "category" not in menu_columns:
-                connection.execute(text("ALTER TABLE menu_items ADD COLUMN category VARCHAR NOT NULL DEFAULT 'main_course'"))
+                connection.execute(text(
+                    "ALTER TABLE menu_items ADD COLUMN category VARCHAR NOT NULL DEFAULT 'main_course'"))
             if "image_url" not in menu_columns:
-                connection.execute(text("ALTER TABLE menu_items ADD COLUMN image_url VARCHAR"))
+                connection.execute(
+                    text("ALTER TABLE menu_items ADD COLUMN image_url VARCHAR"))
 
     _backfill_table_tokens()
 
@@ -89,7 +118,7 @@ def _seed_tables():
                         qr_token=_generate_qr_token(),
                         status=TableStatus.AVAILABLE,
                     )
-                    for number in range(1, 21)
+                    for number in range(1, 11)
                 ]
             )
             db.commit()
@@ -102,7 +131,8 @@ def _backfill_table_tokens():
 
     db = SessionLocal()
     try:
-        tables = db.query(Table).filter((Table.qr_token.is_(None)) | (Table.qr_token == "")).all()
+        tables = db.query(Table).filter(
+            (Table.qr_token.is_(None)) | (Table.qr_token == "")).all()
         if not tables:
             return
 
