@@ -33,7 +33,7 @@
       <div class="flex items-center justify-between border-t border-border pt-3">
         <div>
           <p class="text-xs uppercase tracking-[0.2em] text-muted-foreground">{{ item.category }}</p>
-          <p class="mt-1 text-lg font-semibold text-foreground">${{ item.price }}</p>
+          <p class="mt-1 text-lg font-semibold text-foreground">฿{{ item.price }}</p>
         </div>
 
         <div

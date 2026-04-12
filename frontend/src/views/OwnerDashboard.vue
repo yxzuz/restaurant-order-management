@@ -37,7 +37,7 @@
                 <p class="mt-1 text-xs text-muted-foreground">{{ order.items.length }} items</p>
               </div>
               <div class="text-right">
-                <p class="text-sm font-semibold text-foreground">${{ order.total_amount.toFixed(2) }}</p>
+                <p class="text-sm font-semibold text-foreground">฿{{ order.total_amount.toFixed(2) }}</p>
                 <div class="mt-2">
                   <StatusBadge :status="order.status" />
                 </div>
@@ -60,7 +60,7 @@
                   <p class="mt-1 text-xs text-muted-foreground">{{ item.category }}</p>
                 </div>
               </div>
-              <p class="text-sm font-semibold text-foreground">${{ item.price.toFixed(2) }}</p>
+              <p class="text-sm font-semibold text-foreground">฿{{ item.price.toFixed(2) }}</p>
             </div>
           </div>
         </PanelCard>
@@ -140,7 +140,7 @@ onMounted(() => {
 const stats = computed(() => [
   {
     title: 'Total Revenue',
-    value: `$${orders.value.reduce((sum, order) => sum + Number(order.total_amount), 0).toFixed(2)}`,
+    value: `฿${orders.value.reduce((sum, order) => sum + Number(order.total_amount), 0).toFixed(2)}`,
     icon: DollarSign,
     description: "Today's earnings",
   },

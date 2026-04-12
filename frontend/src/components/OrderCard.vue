@@ -31,7 +31,7 @@
 
         <div class="text-left sm:text-right">
           <p class="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">Total</p>
-          <p class="mt-1 text-2xl font-semibold text-orange-600">${{ totalAmount }}</p>
+          <p class="mt-1 text-2xl font-semibold text-orange-600">฿{{ totalAmount }}</p>
         </div>
       </div>
 
@@ -53,7 +53,7 @@
                 </div>
                 <p class="text-xs text-muted-foreground">Qty {{ item.quantity }}</p>
               </div>
-              <p class="text-sm font-semibold text-foreground">${{ getOrderItemSubtotal(item).toFixed(2) }}</p>
+              <p class="text-sm font-semibold text-foreground">฿{{ getOrderItemSubtotal(item).toFixed(2) }}</p>
             </div>
             <div class="flex gap-2">
               <button
@@ -185,7 +185,8 @@ const formattedTime = computed(() => {
     return 'Unknown time'
   }
 
-  return createdAt.toLocaleString([], {
+  return createdAt.toLocaleString('th-TH', {
+    timeZone: 'Asia/Bangkok',
     month: 'short',
     day: 'numeric',
     hour: 'numeric',

@@ -80,13 +80,56 @@
     <!-- Orders volume bar chart -->
     <div class="card">
       <p class="section-title">{{ currentTab === 'today' ? 'Orders per day this week' : 'Orders per week this month' }}</p>
+      <p v-if="sourceOrders.length === 0" style="font-size:12px; color:var(--color-text-tertiary); margin-bottom:8px;">
+        No orders found. Create some orders to see data.
+      </p>
       <div style="display:flex; align-items:flex-end; gap:6px; height:100px;">
         <div v-for="b in volumeBars" :key="b.label" style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px;">
           <span style="font-size:11px; color:var(--color-text-tertiary);">{{ b.val }}</span>
           <div style="width:100%; background:var(--color-background-secondary); border-radius:4px; height:72px; display:flex; align-items:flex-end; overflow:hidden;">
-            <div :style="{ height: Math.round(b.val / b.max * 100) + '%', background: chartColor }" style="width:100%; border-radius:4px 4px 0 0; opacity:0.85;" />
+            <div :style="{ height: b.val === 0 ? '2%' : Math.round(b.val / b.max * 100) + '%', background: b.val === 0 ? 'var(--color-border-tertiary)' : chartColor }" style="width:100%; border-radius:4px 4px 0 0; opacity:0.85;" />
           </div>
           <span style="font-size:11px; color:var(--color-text-tertiary);">{{ b.label }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top Selling Items -->
+    <div class="card" v-if="topItems.length">
+      <p class="section-title">Top Selling Items</p>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div v-for="(item, idx) in topItems.slice(0, 5)" :key="item.id" 
+             style="display: flex; align-items: center; gap: 10px; padding: 8px; background: var(--color-background-secondary); border-radius: 8px;">
+          <span style="font-size:14px; font-weight:600; color:var(--color-text-tertiary); width:24px; text-align:center;">
+            {{ idx + 1 }}
+          </span>
+          <div style="flex: 1;">
+            <div style="font-size:13px; font-weight:500; color:var(--color-text-primary);">
+              {{ item.name }}
+            </div>
+            <div style="font-size:11px; color:var(--color-text-tertiary);">
+              {{ item.total_quantity }} sold • {{ item.category }}
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size:14px; font-weight:600; color:var(--primary);">
+              ฿{{ item.total_revenue.toFixed(2) }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Revenue by Category -->
+    <div class="card" v-if="categoryRevenue.length">
+      <p class="section-title">Revenue by Category</p>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div v-for="cat in categoryRevenue" :key="cat.category" class="bar-row">
+          <span class="bar-label">{{ cat.category }}</span>
+          <div class="bar-track">
+            <div class="bar-fill" :style="{ width: cat.percentage + '%', background: chartColor }" />
+          </div>
+          <span class="bar-val" style="width: 80px;">฿{{ cat.revenue.toFixed(2) }}</span>
         </div>
       </div>
     </div>
@@ -99,13 +142,15 @@ import { ref, computed, onMounted } from 'vue'
 import { Clock3, DollarSign, ShoppingBag, Timer } from 'lucide-vue-next'
 import DashboardLayout from '@/components/DashboardLayout.vue'
 import StatCard from '@/components/ui/StatCard.vue'
-import { fetchOwnerOrders } from '@/services/owner'
+import { fetchOwnerOrders, fetchTopItems } from '@/services/owner'
 
 const props = defineProps({
   orders: { type: Array, default: () => [] },
 })
 
 const fetchedOrders = ref([])
+const topItems = ref([])
+const revenueByCategory = ref([])
 
 const tabs = [
   { key: 'today', label: 'Today' },
@@ -119,6 +164,7 @@ onMounted(() => {
   if (!props.orders.length) {
     loadOrders()
   }
+  loadTopItems()
 })
 
 // ── helpers ──────────────────────────────────────────────────────────────────
@@ -166,6 +212,17 @@ async function loadOrders() {
   }
 }
 
+async function loadTopItems() {
+  try {
+    const data = await fetchTopItems(10)
+    topItems.value = data.top_items || []
+    revenueByCategory.value = data.revenue_by_category || []
+  } catch {
+    topItems.value = []
+    revenueByCategory.value = []
+  }
+}
+
 // ── filtered order sets ───────────────────────────────────────────────────────
 
 const todayOrders    = computed(() => sourceOrders.value.filter(o => isToday(o.created_at)))
@@ -195,8 +252,8 @@ const metrics = computed(() => {
 
   return [
     { title: 'Orders', value: curr.length.toLocaleString(), delta: countDelta.str, icon: ShoppingBag },
-    { title: 'Revenue', value: '$' + totalRevenue(curr).toFixed(2), delta: revDelta.str, icon: DollarSign },
-    { title: 'Avg Order', value: '$' + avgOrder(curr).toFixed(2), delta: avgDelta.str, icon: Clock3 },
+    { title: 'Revenue', value: '฿' + totalRevenue(curr).toFixed(2), delta: revDelta.str, icon: DollarSign },
+    { title: 'Avg Order', value: '฿' + avgOrder(curr).toFixed(2), delta: avgDelta.str, icon: Clock3 },
     { title: 'Avg Prep Time', value: avgPrepTime.value, delta: prepDelta.value.str, icon: Timer },
   ]
 })
@@ -308,25 +365,45 @@ const donutGradient = computed(() => {
   return `conic-gradient(${stops.join(',')})`
 })
 
+// ── revenue by category ───────────────────────────────────────────────────────
+
+const categoryRevenue = computed(() => {
+  if (!revenueByCategory.value.length) return []
+  const total = revenueByCategory.value.reduce((sum, cat) => sum + cat.revenue, 0)
+  return revenueByCategory.value.map(cat => ({
+    ...cat,
+    percentage: total > 0 ? Math.round((cat.revenue / total) * 100) : 0
+  }))
+})
+
 // ── volume bars ───────────────────────────────────────────────────────────────
 
 const volumeBars = computed(() => {
   if (currentTab.value === 'today') {
     // Mon–Sun of current week
     const now = new Date()
+    const day = now.getDay()
+    const diff = now.getDate() - day + (day === 0 ? -6 : 1) // Adjust when day is Sunday
     const startOfWeek = new Date(now)
-    startOfWeek.setDate(now.getDate() - now.getDay() + 1) // Monday
+    startOfWeek.setDate(diff)
+    startOfWeek.setHours(0, 0, 0, 0)
+    
     const days = Array.from({ length: 7 }, (_, i) => {
       const d = new Date(startOfWeek)
       d.setDate(startOfWeek.getDate() + i)
       return d
     })
-      const counts = days.map(d =>
-      sourceOrders.value.filter(o => {
-        const od = new Date(o.created_at)
-        return od.toDateString() === d.toDateString()
+    
+    const counts = days.map(d => {
+      return sourceOrders.value.filter(o => {
+        const orderDate = new Date(o.created_at)
+        // Compare year, month, and day
+        return orderDate.getFullYear() === d.getFullYear() &&
+               orderDate.getMonth() === d.getMonth() &&
+               orderDate.getDate() === d.getDate()
       }).length
-    )
+    })
+    
     const max = Math.max(...counts, 1)
     const labels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
     return days.map((d, i) => ({ label: labels[i], val: counts[i], max }))

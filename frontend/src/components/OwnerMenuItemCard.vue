@@ -52,7 +52,7 @@
 
       <div class="flex items-center justify-between border-t border-border pt-3">
         <div>
-          <p class="mt-1 text-lg font-semibold text-foreground">${{ item.price }}</p>
+          <p class="mt-1 text-lg font-semibold text-foreground">฿{{ item.price }}</p>
         </div>
 
         <div class="flex items-center gap-2">

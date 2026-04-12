@@ -5,6 +5,7 @@ from sqlalchemy import Column, DateTime, Enum as SQLEnum, ForeignKey, Integer, N
 from sqlalchemy.orm import relationship
 
 from app.db import Base
+from app.core.timezone import now_thai
 
 
 class ItemStatus(str, Enum):
@@ -29,9 +30,9 @@ class OrderItem(Base):
         nullable=False,
         default=ItemStatus.NEW,
     )
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    created_at = Column(DateTime, nullable=False, default=now_thai)
     updated_at = Column(DateTime, nullable=False,
-                        default=datetime.utcnow, onupdate=datetime.utcnow)
+                        default=now_thai, onupdate=now_thai)
 
     order = relationship("Order", back_populates="items")
     menu_item = relationship("MenuItem", back_populates="order_items")

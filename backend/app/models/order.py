@@ -5,6 +5,7 @@ from datetime import datetime
 from sqlalchemy import Column, DateTime, Enum as SQLEnum, ForeignKey, Integer
 from sqlalchemy.orm import relationship
 from app.db import Base
+from app.core.timezone import now_thai
 
 
 class OrderStatus(str, Enum):
@@ -35,8 +36,8 @@ class Order(Base):
         nullable=False,
         default=PaymentStatus.UNPAID,
     )
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, nullable=False, default=now_thai)
+    updated_at = Column(DateTime, nullable=False, default=now_thai, onupdate=now_thai)
     closed_at = Column(DateTime)
 
     table = relationship("Table", back_populates="orders")

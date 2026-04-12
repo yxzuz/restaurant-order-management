@@ -16,23 +16,23 @@ Current paper-based processes cause:
 
 ## 3. Project Objectives
 
-- [ ] Digitize restaurant order tracking
-- [ ] Reduce order errors and staff miscommunication
-- [ ] Show real-time order status
-- [ ] Support role-based system access
-- [ ] Provide daily sales and order analytics
+- [x] Digitize restaurant order tracking
+- [x] Reduce order errors and staff miscommunication
+- [x] Show real-time order status
+- [x] Support role-based system access
+- [x] Provide daily sales and order analytics
 
 ## 4. Scope
 
 ### In Scope
 
-- [ ] User authentication
-- [ ] Role-based authorization
-- [ ] Menu management
-- [ ] Order placement
-- [ ] Order tracking
-- [ ] Order history
-- [ ] Daily sales and order analytics
+- [x] User authentication
+- [x] Role-based authorization
+- [x] Menu management
+- [x] Order placement
+- [x] Order tracking
+- [x] Order history
+- [x] Daily sales and order analytics
 
 ### Out of Scope
 
@@ -45,187 +45,203 @@ Current paper-based processes cause:
 
 ### Customer / Table Session
 
-- [ ] Browse menu
-- [ ] Scan QR code at the table
-- [ ] Place orders for the scanned table
-- [ ] View current table order status
-- [ ] Request cancellation only before kitchen starts preparation
+- [x] Browse menu
+- [x] Scan QR code at the table
+- [x] Place orders for the scanned table
+- [x] View current table order status
+- [x] Request cancellation only before kitchen starts preparation
 
 ### Staff
 
-- [ ] View incoming and active orders
-- [ ] Update order status
+- [x] View incoming and active orders
+- [x] Update order status (per-item)
 - [ ] Filter and search active orders
-- [ ] Manage order workflow queue
+- [x] Manage order workflow queue
+- [x] Toggle menu item availability
 
 ### Owner
 
-- [ ] Full CRUD for menu items
-- [ ] View all orders
-- [ ] View reports and analytics
-- [ ] Manage restaurant data and staff accounts
+- [x] Full CRUD for menu items
+- [x] View all orders
+- [x] View reports and analytics (connected to backend)
+- [x] Manage restaurant data and staff accounts
 
 ## 6. Core Features
 
-- [ ] Staff and owner authentication
-- [ ] QR-based table access
-- [ ] Table-based order placement
-- [ ] Order status tracking
-- [ ] Staff order status updates
-- [ ] Owner menu management
-- [ ] Owner reporting dashboard
+- [x] Staff and owner authentication
+- [x] QR-based table access
+- [x] Table-based order placement
+- [x] Order status tracking (per-item)
+- [x] Staff order status updates
+- [x] Owner menu management
+- [x] Owner reporting dashboard (analytics with real data)
 
 ## 7. Suggested Order Status Flow
 
-- [ ] New
-- [ ] Preparing
-- [ ] Ready
-- [ ] Completed
-- [ ] Cancelled
+- [x] New
+- [x] Preparing
+- [x] Ready
+- [x] Completed
+- [x] Cancelled
 
 Rules:
 
-- [ ] Customer can cancel only when status is `New`
-- [ ] Staff can move order from `New` to `Preparing`
-- [ ] Staff can move order from `Preparing` to `Ready`
-- [ ] Staff can move order from `Ready` to `Completed`
-- [ ] Cancelled orders cannot be edited further
+- [x] Customer can cancel only when status is `New` (per-item)
+- [x] Staff can move order from `New` to `Preparing` (per-item)
+- [x] Staff can move order from `Preparing` to `Ready` (per-item)
+- [x] Staff can move order from `Ready` to `Completed` (per-item)
+- [x] Cancelled items cannot be edited further
+- [x] Cannot cancel items from paid orders
 
 ## 8. MVP Definition
 
 Finish these first before adding advanced features:
 
-- [ ] Login system for staff and owner
-- [ ] User roles: staff, owner
-- [ ] QR-based customer ordering flow
-- [ ] Menu listing
-- [ ] Create order
-- [ ] View order status
-- [ ] Staff updates order status
-- [ ] Owner manages menu
-- [ ] Basic daily sales summary
+- [x] Login system for staff and owner
+- [x] User roles: staff, owner
+- [x] QR-based customer ordering flow
+- [x] Menu listing
+- [x] Create order
+- [x] View order status (real-time auto-refresh)
+- [x] Staff updates order status (per-item)
+- [x] Owner manages menu
+- [x] Basic daily sales summary (comprehensive analytics)
 
 ## 9. Database Planning
 
 ### Main Entities
 
-- [ ] Users
-- [ ] Tables
-- [ ] Menu items
-- [ ] Orders
-- [ ] Order items
+- [x] Users
+- [x] Tables
+- [x] Menu items
+- [x] Orders
+- [x] Order items
 
 ### Recommended Fields
 
 #### Users
 
-- [ ] id
-- [ ] username
-- [ ] email
-- [ ] password_hash
-- [ ] role
-- [ ] created_at
+- [x] id
+- [x] username
+- [x] email
+- [x] password_hash
+- [x] role
+- [x] created_at
 
 #### Tables
 
-- [ ] id
-- [ ] number
-- [ ] qr_token
-- [ ] status
+- [x] id
+- [x] number
+- [x] qr_token
+- [x] status
 
 #### Menu Items
 
-- [ ] id
-- [ ] name
-- [ ] description
-- [ ] price
-- [ ] category
-- [ ] is_available
-- [ ] created_at
+- [x] id
+- [x] name
+- [x] description
+- [x] price
+- [x] category
+- [x] is_available
+- [x] created_at
+- [x] image_url (S3)
 
 #### Orders
 
-- [ ] id
-- [ ] table_id
-- [ ] status
-- [ ] payment_status
-- [ ] total_amount
-- [ ] created_at
-- [ ] updated_at
+- [x] id
+- [x] table_id
+- [x] status
+- [x] payment_status
+- [x] total_amount
+- [x] created_at
+- [x] updated_at
+- [x] closed_at
 
 #### Order Items
 
-- [ ] id
-- [ ] order_id
-- [ ] menu_item_id
-- [ ] quantity
-- [ ] unit_price
-- [ ] subtotal
+- [x] id
+- [x] order_id
+- [x] menu_item_id
+- [x] quantity
+- [x] unit_price
+- [x] subtotal
+- [x] status (NEW/PREPARING/READY/COMPLETED per-item)
 
 ## 10. Backend Checklist
 
 ### Project Setup
 
-- [ ] Clean up `requirements.txt`
-- [ ] Add all missing dependencies
-- [ ] Configure `.env` support
-- [ ] Choose final database: PostgreSQL or MySQL
+- [x] Clean up `requirements.txt`
+- [x] Add all missing dependencies
+- [x] Configure `.env` support
+- [x] Choose final database: SQLite (current)
 - [ ] Replace SQLite if production DB is required for final delivery
 
 ### Architecture
 
-- [ ] Keep layered structure: routes, services, repositories, schemas, models
-- [ ] Separate business logic from API routes
-- [ ] Add dependency injection for DB session and auth
+- [x] Keep layered structure: routes, services, repositories, schemas, models
+- [x] Separate business logic from API routes
+- [x] Add dependency injection for DB session and auth
 
 ### Authentication
 
-- [ ] Create staff/owner registration or seed accounts
-- [ ] Create login endpoint
-- [ ] Hash passwords securely
-- [ ] Generate JWT tokens
-- [ ] Protect routes by role
+- [x] Create staff/owner registration or seed accounts
+- [x] Create login endpoint
+- [x] Hash passwords securely (bcrypt)
+- [x] Generate JWT tokens (30-min expiration)
+- [x] Protect routes by role (require_owner, require_staff_or_owner)
+- [x] Auto-logout on token expiration
 
 ### Menu Module
 
-- [ ] Get all menu items
-- [ ] Get menu item by id
-- [ ] Create menu item
-- [ ] Update menu item
-- [ ] Delete menu item
-- [ ] Restrict create/update/delete to owner
+- [x] Get all menu items
+- [x] Get menu item by id
+- [x] Create menu item (owner only)
+- [x] Update menu item (owner full edit, staff availability toggle)
+- [x] Delete menu item (owner only)
+- [x] Restrict create/update/delete to owner
+- [x] Image upload support (S3)
 
 ### Order Module
 
-- [ ] Pre-create tables `1..20`
-- [ ] Validate table exists before customer order access
-- [ ] Validate QR token before customer order access
-- [ ] Create or reuse active order for a table
-- [ ] Customer/table views active order
-- [ ] Customer/table cancels only `New` orders
-- [ ] Staff views active orders
-- [ ] Staff updates order status
-- [ ] Owner views all orders
+- [x] Pre-create tables `1..20`
+- [x] Validate table exists before customer order access
+- [x] Validate QR token before customer order access
+- [x] Create or reuse active order for a table
+- [x] Customer/table views active order (auto-refresh every 5s)
+- [x] Customer/table cancels only `New` items (not paid orders)
+- [x] Staff views active orders
+- [x] Staff updates order status (per-item)
+- [x] Owner views all orders
+- [x] Per-item status tracking and advancement
+- [x] Per-item cancellation (NEW items only)
+- [x] Payment status tracking
+- [x] Mark order as paid (requires ALL items COMPLETED)
 
 ### Validation and Rules
 
-- [ ] Validate order item quantities
-- [ ] Prevent ordering unavailable menu items
-- [ ] Calculate totals on the backend
-- [ ] Restrict invalid status transitions
+- [x] Validate order item quantities
+- [x] Prevent ordering unavailable menu items
+- [x] Calculate totals on the backend
+- [x] Restrict invalid status transitions
+- [x] Uppercase enum values (NEW/PREPARING/READY/COMPLETED)
+- [x] Database migration for status column
+- [x] Cannot cancel items from paid orders
 
 ### Reporting
 
-- [ ] Daily sales total
-- [ ] Orders count by day
-- [ ] Revenue by paid orders
-- [ ] Orders by status
-- [ ] Top-selling menu items
+- [x] Daily sales total
+- [x] Orders count by day
+- [x] Revenue by paid orders
+- [x] Orders by status
+- [x] Top-selling menu items
+- [x] Revenue by category
+- [x] Hourly order distribution
 
 ### Backend Quality
 
-- [ ] Add seed data for demo users and menu
-- [ ] Add API error handling
+- [x] Add seed data for demo users and menu
+- [x] Add API error handling
 - [ ] Add logging
 - [ ] Add unit tests for services
 - [ ] Add API tests for routes
@@ -234,91 +250,111 @@ Finish these first before adding advanced features:
 
 ### Project Setup
 
-- [ ] Define page structure
-- [ ] Set up router guards for auth and roles
-- [ ] Create API service layer
-- [ ] Add state management if needed
+- [x] Define page structure
+- [x] Set up router guards for auth and roles
+- [x] Create API service layer
+- [x] Add state management (localStorage for auth)
 
 ### Customer Pages
 
-- [ ] Menu page
-- [ ] QR landing route
-- [ ] Read table number and QR token from URL
-- [ ] Validate scanned table with backend
-- [ ] Cart / order form
-- [ ] Current table order page
+- [x] Menu page
+- [x] QR landing route
+- [x] Read table number and QR token from URL
+- [x] Validate scanned table with backend
+- [x] Cart / order form
+- [x] Current table order page (auto-refresh)
+- [x] Per-item status display
+- [x] Item cancellation (NEW items only)
 
 ### Staff Pages
 
-- [ ] Staff login
-- [ ] Active orders dashboard
-- [ ] Order status update screen
+- [x] Staff login
+- [x] Active orders dashboard
+- [x] Order status update screen (per-item)
 - [ ] Order filter/search UI
+- [x] Menu availability toggle
+- [x] Role-based sidebar (Orders, Menu only)
 
 ### Owner Pages
 
-- [ ] Owner dashboard
-- [ ] Menu management page
-- [ ] Reports / analytics page
-- [ ] User management page if included
+- [x] Owner dashboard
+- [x] Menu management page (full CRUD)
+- [x] Reports / analytics page (UI ready, needs data)
+- [x] User management page (staff accounts)
+- [x] Tables management page
+- [x] Role-based sidebar (all features)
 
 ### Frontend Quality
 
-- [ ] Handle loading states
-- [ ] Handle empty states
-- [ ] Handle API errors clearly
-- [ ] Keep role-based navigation clean
-- [ ] Make UI responsive for laptop and tablet
+- [x] Handle loading states
+- [x] Handle empty states
+- [x] Handle API errors clearly (401 auto-logout)
+- [x] Keep role-based navigation clean
+- [x] Make UI responsive for laptop and tablet
+- [x] Token expiration handling
+- [x] Role detection from route path
 
 ## 12. API Checklist
 
-- [ ] `POST /auth/register`
-- [ ] `POST /auth/login`
-- [ ] `GET /tables`
-- [ ] `GET /tables/{number}/active-order?qr_token=...`
-- [ ] `GET /menus`
-- [ ] `POST /menus`
-- [ ] `PUT /menus/{id}`
-- [ ] `DELETE /menus/{id}`
-- [ ] `POST /orders`
-- [ ] `GET /orders/active`
-- [ ] `PATCH /orders/{id}/payment`
-- [ ] `PATCH /orders/{id}/status`
-- [ ] `GET /reports/daily-sales`
+- [x] `POST /auth/register`
+- [x] `POST /auth/login`
+- [x] `GET /tables`
+- [x] `GET /tables/{number}/active-order?qr_token=...`
+- [x] `GET /menus`
+- [x] `POST /menus` (owner only)
+- [x] `PATCH /menus/{id}` (owner full, staff availability)
+- [x] `DELETE /menus/{id}` (owner only)
+- [x] `POST /orders`
+- [x] `GET /orders` (all orders for owner/staff)
+- [x] `PATCH /orders/{id}/payment`
+- [x] `PATCH /orders/{id}/status`
+- [x] `PATCH /orders/{order_id}/items/{item_id}/status` (per-item)
+- [x] `DELETE /orders/{order_id}/items/{item_id}` (cancel item)
+- [x] `GET /reports/daily-sales`
+- [x] `GET /reports/top-items`
+- [x] `GET /reports/analytics`
 
 ## 13. Suggested Milestones
 
 ### Milestone 1: Foundation
 
-- [ ] Finalize requirements
-- [ ] Finalize roles and permissions
-- [ ] Finalize DB schema
-- [ ] Set up backend and frontend environments
+- [x] Finalize requirements
+- [x] Finalize roles and permissions
+- [x] Finalize DB schema
+- [x] Set up backend and frontend environments
 
 ### Milestone 2: Authentication
 
-- [ ] Register/login flow works
-- [ ] JWT auth works
-- [ ] Route protection works
+- [x] Register/login flow works
+- [x] JWT auth works (30-min expiration)
+- [x] Route protection works
+- [x] Auto-logout on token expiration
 
 ### Milestone 3: Menu Management
 
-- [ ] Owner can manage menu
-- [ ] Customer can browse menu
+- [x] Owner can manage menu (full CRUD)
+- [x] Staff can toggle menu availability
+- [x] Customer can browse menu with descriptions
+- [x] Image upload support (S3)
 
 ### Milestone 4: Order Workflow
 
-- [ ] Customer can enter through scanned QR link
-- [ ] Table can create order
-- [ ] Staff can view queue
-- [ ] Staff can update status
-- [ ] Table can track status
-- [ ] Staff can mark order as paid and free the table
+- [x] Customer can enter through scanned QR link
+- [x] Table can create order
+- [x] Staff can view queue
+- [x] Staff can update status (per-item)
+- [x] Table can track status (auto-refresh 5s)
+- [x] Staff can mark order as paid and free the table
+- [x] Per-item status advancement
+- [x] Per-item cancellation (NEW items only)
+- [x] Payment validation (all items COMPLETED)
 
 ### Milestone 5: Reporting
 
-- [ ] Owner can view daily summary
-- [ ] Owner can view analytics
+- [x] Owner can view daily summary (UI ready)
+- [x] Owner can view analytics (connected to real backend data)
+- [x] Top selling items display
+- [x] Revenue by category display
 
 ### Milestone 6: Finalization
 
@@ -329,49 +365,104 @@ Finish these first before adding advanced features:
 
 ## 14. Testing Checklist
 
-- [ ] Test staff login
-- [ ] Test owner login
-- [ ] Test unauthorized access is blocked
-- [ ] Test order creation
-- [ ] Test table active-order flow
-- [ ] Test cancel rule for `New` orders only
-- [ ] Test staff status update flow
-- [ ] Test payment closes order and frees table
-- [ ] Test menu CRUD permissions
+- [x] Test staff login
+- [x] Test owner login
+- [x] Test unauthorized access is blocked
+- [x] Test order creation
+- [x] Test table active-order flow
+- [x] Test cancel rule for `New` items only
+- [x] Test staff status update flow (per-item)
+- [x] Test payment closes order and frees table
+- [x] Test menu CRUD permissions
 - [ ] Test analytics endpoints
+- [x] Test token expiration and auto-logout
+- [x] Test role-based navigation
+- [x] Test per-item cancellation (not paid orders)
 
 ## 15. Documentation Checklist
 
-- [ ] Update README run instructions
-- [ ] Add environment setup steps
+- [x] Update README run instructions
+- [x] Add environment setup steps
 - [ ] Document API endpoints
-- [ ] Document QR code table access flow
-- [ ] Document table-based customer flow
-- [ ] Document user roles and permissions
+- [x] Document QR code table access flow
+- [x] Document table-based customer flow
+- [x] Document user roles and permissions
 - [ ] Document database schema
 - [ ] Add screenshots for final submission
 
 ## 16. Recommended Build Order
 
-1. [ ] Fix backend dependencies and startup
-2. [ ] Finalize database models
-3. [ ] Implement staff/owner authentication and roles
-4. [ ] Implement menu CRUD
-5. [ ] Implement QR-backed table model and active table order flow
-6. [ ] Implement order status and payment workflow
-7. [ ] Build frontend pages for each role
+1. [x] Fix backend dependencies and startup
+2. [x] Finalize database models
+3. [x] Implement staff/owner authentication and roles
+4. [x] Implement menu CRUD
+5. [x] Implement QR-backed table model and active table order flow
+6. [x] Implement order status and payment workflow
+7. [x] Build frontend pages for each role
 8. [ ] Add reporting and analytics
 9. [ ] Add tests
 10. [ ] Clean up README and prepare demo
 
 ## 17. Immediate Next Tasks For This Repo
 
-- [ ] Fix backend dependency issues in `requirements.txt`
-- [ ] Add missing auth module and JWT support
-- [ ] Verify current models match project scope
-- [ ] Add customer, staff, and owner role enforcement
-- [ ] Add QR route and scanned-table frontend flow
-- [ ] Add missing menu and order endpoints
+- [x] Fix backend dependency issues in `requirements.txt`
+- [x] Add missing auth module and JWT support
+- [x] Verify current models match project scope
+- [x] Add customer, staff, and owner role enforcement
+- [x] Add QR route and scanned-table frontend flow
+- [x] Add missing menu and order endpoints
 - [ ] Add tests under `backend/tests`
-- [ ] Connect frontend pages to backend API
-- [ ] Update README with correct backend startup command
+- [x] Connect frontend pages to backend API
+- [x] Update README with correct backend startup command
+
+## 18. REMAINING TASKS
+
+### High Priority
+
+1. [x] **Analytics/Reporting Backend** - Implement `/reports/daily-sales` endpoint
+   - Daily sales total
+   - Orders count by day
+   - Revenue by paid orders
+   - Orders by status breakdown
+   - Top-selling menu items
+
+2. [x] **Connect Analytics Frontend** - Wire OwnerAnalytics.vue to real data
+   - Replace mock data with API calls
+   - Display sales charts
+   - Show KPIs (revenue, orders, etc.)
+   - Added top selling items section
+   - Added revenue by category section
+
+3. [ ] **Order Search/Filter** - Add filtering to staff/owner order views
+   - Filter by status
+   - Filter by date/time
+   - Search by table number
+
+### Medium Priority
+
+4. [ ] **Logging** - Add structured logging throughout backend
+   - Request/response logging
+   - Error tracking
+   - Performance monitoring
+
+5. [ ] **Testing** - Add unit and integration tests
+   - Service layer unit tests
+   - API endpoint tests
+   - Frontend component tests
+
+6. [ ] **API Documentation** - Generate OpenAPI/Swagger docs
+   - Document all endpoints
+   - Include request/response examples
+   - Authentication flow documentation
+
+### Low Priority
+
+7. [ ] **Database Migration** - Consider PostgreSQL for production
+   - Current: SQLite (development)
+   - Production: PostgreSQL/MySQL recommended
+
+8. [ ] **Screenshots & Demo** - Prepare final presentation materials
+   - Owner dashboard screenshots
+   - Staff workflow screenshots
+   - Customer ordering flow screenshots
+   - Demo video/walkthrough

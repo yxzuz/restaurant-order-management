@@ -28,10 +28,13 @@ def get_menu_item(item_id: int, db: Session = Depends(get_db)):
     service = MenuService(db)
     menu_item = service.get_menu_item(item_id)
     if menu_item is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Menu item not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Menu item not found")
     return menu_item
 
 # crud operations for menu items, only accessible by the owner of the restaurant
+
+
 @router.post("/", response_model=MenuItemRead, status_code=status.HTTP_201_CREATED)
 def create_menu_item(
     name: str = Form(...),
@@ -48,7 +51,8 @@ def create_menu_item(
         try:
             image_url = service.upload_menu_image(image)
         except ValueError as exc:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
 
     return service.create_menu_item(
         name=name,
@@ -85,21 +89,25 @@ def update_menu_item(
         try:
             changes["image_url"] = service.upload_menu_image(image)
         except ValueError as exc:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
 
     if not changes:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No fields provided for update")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="No fields provided for update")
 
     try:
         return service.update_menu_item(item_id, **changes)
     except ValueError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
 
 
 @router.delete("/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_menu_item(item_id: int, db: Session = Depends(get_db), _current_user = Depends(require_owner)):
+def delete_menu_item(item_id: int, db: Session = Depends(get_db), _current_user=Depends(require_owner)):
     service = MenuService(db)
     try:
         service.delete_menu_item(item_id)
     except ValueError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc

@@ -563,9 +563,9 @@ async function submitOrder() {
 }
 
 function formatCurrency(value) {
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('th-TH', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'THB',
   }).format(Number(value) || 0)
 }
 

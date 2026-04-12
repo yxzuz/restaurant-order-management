@@ -158,14 +158,15 @@ class OrderService:
             )
 
         self.order_repository.delete_item(item)
-        
+
         # Refresh the order to get updated items list
         updated_order = self.order_repository.get_by_id(order_id)
-        
+
         # If no items left, cancel the entire order
         if updated_order and (not updated_order.items or len(updated_order.items) == 0):
-            self.order_repository.update_status(updated_order, OrderStatus.CANCELLED)
-        
+            self.order_repository.update_status(
+                updated_order, OrderStatus.CANCELLED)
+
         return self.order_repository.get_by_id(order_id)
 
     def delete_order(self, order_id):
