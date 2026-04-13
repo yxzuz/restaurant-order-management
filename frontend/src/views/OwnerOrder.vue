@@ -1,10 +1,10 @@
 <template>
   <DashboardLayout :role="userRole">
-    <div class="space-y-6">
+    <div class="space-y-4 sm:space-y-6">
       <div class="flex items-start justify-between">
         <div>
-          <h1 class="font-heading text-3xl font-bold text-foreground">Order Management</h1>
-          <p class="mt-1 text-sm text-muted-foreground">Track live kitchen progress and table orders</p>
+          <h1 class="font-heading text-2xl sm:text-3xl font-bold text-foreground">Order Management</h1>
+          <p class="mt-1 text-xs sm:text-sm text-muted-foreground">Track live kitchen progress and table orders</p>
         </div>
       </div>
 
@@ -15,9 +15,9 @@
         {{ errorMessage }}
       </p>
 
-      <p v-if="loading" class="text-sm text-muted-foreground">Loading orders...</p>
+      <p v-if="loading" class="text-xs sm:text-sm text-muted-foreground">Loading orders...</p>
 
-      <div class="grid gap-4">
+      <div class="space-y-3 sm:space-y-4">
         <OrderCard
           v-for="order in orders"
           :key="order.id"

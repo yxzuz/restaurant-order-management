@@ -1,13 +1,13 @@
 <template>
   <DashboardLayout :role="userRole">
-    <div class="space-y-6">
-      <div class="flex items-start justify-between">
+    <div class="space-y-4 sm:space-y-6">
+      <div class="flex flex-col sm:flex-row items-start gap-3 sm:gap-0 sm:justify-between">
         <div>
-          <h1 class="font-heading text-3xl font-bold text-foreground">Menu Management</h1>
-          <p class="mt-1 text-sm text-muted-foreground">{{ userRole === 'owner' ? 'Add, edit, or remove menu items' : 'Manage menu availability' }}</p>
+          <h1 class="font-heading text-2xl sm:text-3xl font-bold text-foreground">Menu Management</h1>
+          <p class="mt-1 text-xs sm:text-sm text-muted-foreground">{{ userRole === 'owner' ? 'Add, edit, or remove menu items' : 'Manage menu availability' }}</p>
         </div>
 
-        <button v-if="userRole === 'owner'" class="rounded-lg bg-primary px-4 py-2 text-white" @click="openCreate">
+        <button v-if="userRole === 'owner'" class="rounded-lg bg-primary px-4 py-2 text-sm sm:text-base text-white whitespace-nowrap" @click="openCreate">
           + Add Item
         </button>
       </div>
@@ -19,9 +19,9 @@
         {{ errorMessage }}
       </p>
 
-      <p v-if="loading" class="text-sm text-muted-foreground">Loading menu items...</p>
+      <p v-if="loading" class="text-xs sm:text-sm text-muted-foreground">Loading menu items...</p>
 
-      <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div class="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         <OwnerMenuItemCard
           v-for="item in menuItems"
           :key="item.id"

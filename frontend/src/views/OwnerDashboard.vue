@@ -1,9 +1,9 @@
 <template>
   <DashboardLayout role="owner">
-    <div class="space-y-6">
+    <div class="space-y-4 sm:space-y-6">
       <div>
-        <h1 class="font-heading text-3xl font-bold text-foreground">Dashboard</h1>
-        <p class="mt-1 text-sm text-muted-foreground">Overview of today's operations</p>
+        <h1 class="font-heading text-2xl sm:text-3xl font-bold text-foreground">Dashboard</h1>
+        <p class="mt-1 text-xs sm:text-sm text-muted-foreground">Overview of today's operations</p>
       </div>
 
       <p
@@ -13,7 +13,7 @@
         {{ errorMessage }}
       </p>
 
-      <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div class="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
         <StatCard
           v-for="stat in stats"
           :key="stat.title"
@@ -24,21 +24,21 @@
         />
       </div>
 
-      <div class="grid gap-4 xl:grid-cols-2">
+      <div class="grid gap-3 sm:gap-4 lg:grid-cols-2">
         <PanelCard title="Recent Orders" subtitle="Live kitchen and floor activity">
-          <div class="space-y-3">
+          <div class="space-y-2 sm:space-y-3">
             <div
               v-for="order in recentOrders"
               :key="order.id"
-              class="flex items-center justify-between rounded-2xl border border-border/70 px-4 py-3"
+              class="flex items-center justify-between rounded-xl sm:rounded-2xl border border-border/70 px-3 sm:px-4 py-2 sm:py-3"
             >
               <div>
-                <p class="text-sm font-semibold text-foreground">Table {{ order.table_number }}</p>
-                <p class="mt-1 text-xs text-muted-foreground">{{ order.items.length }} items</p>
+                <p class="text-xs sm:text-sm font-semibold text-foreground">Table {{ order.table_number }}</p>
+                <p class="mt-1 text-[10px] sm:text-xs text-muted-foreground">{{ order.items.length }} items</p>
               </div>
               <div class="text-right">
-                <p class="text-sm font-semibold text-foreground">{{ formatCurrency(order.total_amount) }}</p>
-                <div class="mt-2">
+                <p class="text-xs sm:text-sm font-semibold text-foreground">{{ formatCurrency(order.total_amount) }}</p>
+                <div class="mt-1 sm:mt-2">
                   <StatusBadge :status="order.status" />
                 </div>
               </div>
@@ -47,45 +47,45 @@
         </PanelCard>
 
         <PanelCard title="Popular Items" subtitle="Top menu items for today">
-          <div class="space-y-3">
+          <div class="space-y-2 sm:space-y-3">
             <div
               v-for="(item, index) in popularItems"
               :key="item.id"
-              class="flex items-center justify-between rounded-2xl border border-border/70 px-4 py-3"
+              class="flex items-center justify-between rounded-xl sm:rounded-2xl border border-border/70 px-3 sm:px-4 py-2 sm:py-3"
             >
-              <div class="flex items-center gap-4">
-                <span class="font-heading text-2xl font-bold text-muted-foreground">#{{ index + 1 }}</span>
+              <div class="flex items-center gap-2 sm:gap-4">
+                <span class="font-heading text-xl sm:text-2xl font-bold text-muted-foreground">#{{ index + 1 }}</span>
                 <div>
-                  <p class="text-sm font-semibold text-foreground">{{ item.name }}</p>
-                  <p class="mt-1 text-xs text-muted-foreground">{{ item.category }}</p>
+                  <p class="text-xs sm:text-sm font-semibold text-foreground">{{ item.name }}</p>
+                  <p class="mt-1 text-[10px] sm:text-xs text-muted-foreground">{{ item.category }}</p>
                 </div>
               </div>
-              <p class="text-sm font-semibold text-foreground">{{ formatCurrency(item.price) }}</p>
+              <p class="text-xs sm:text-sm font-semibold text-foreground">{{ formatCurrency(item.price) }}</p>
             </div>
           </div>
         </PanelCard>
       </div>
 
       <PanelCard title="Table QR Codes" subtitle="Scan opens the direct customer ordering link">
-        <div v-if="tableLinks.length === 0" class="text-sm text-muted-foreground">
+        <div v-if="tableLinks.length === 0" class="text-xs sm:text-sm text-muted-foreground">
           No table QR codes available.
         </div>
 
-        <div v-else class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div v-else class="grid gap-3 sm:gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           <div
             v-for="table in tableLinks"
             :key="table.id"
-            class="rounded-3xl border border-border/70 bg-background p-4"
+            class="rounded-2xl sm:rounded-3xl border border-border/70 bg-background p-3 sm:p-4"
           >
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-xs uppercase tracking-[0.2em] text-muted-foreground">Table</p>
-                <p class="mt-1 text-2xl font-semibold text-foreground">{{ table.number }}</p>
+                <p class="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-muted-foreground">Table</p>
+                <p class="mt-1 text-xl sm:text-2xl font-semibold text-foreground">{{ table.number }}</p>
               </div>
               <StatusBadge :status="table.status" />
             </div>
 
-            <div class="mt-4 overflow-hidden rounded-2xl border border-border bg-white p-3">
+            <div class="mt-3 sm:mt-4 overflow-hidden rounded-xl sm:rounded-2xl border border-border bg-white p-2 sm:p-3">
               <img
                 :src="table.qrImage"
                 :alt="`Table ${table.number} QR code`"
@@ -93,10 +93,10 @@
               >
             </div>
 
-            <div class="mt-4 space-y-2">
+            <div class="mt-3 sm:mt-4 space-y-1.5 sm:space-y-2">
               <button
                 type="button"
-                class="w-full rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
+                class="w-full rounded-lg sm:rounded-xl bg-primary px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
                 @click="copyTableLink(table)"
               >
                 Copy link

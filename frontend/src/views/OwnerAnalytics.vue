@@ -1,11 +1,11 @@
 <template>
   <DashboardLayout role="owner">
-    <div style="padding: 20px 0;">
+    <div class="py-4 sm:py-5 space-y-3 sm:space-y-4">
 
     <!-- Header + tab toggle -->
-    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
-      <p style="font-size:15px; font-weight:500; color:var(--color-text-primary);">Overview</p>
-      <div style="display:flex; gap:4px; background:var(--color-background-secondary); padding:3px; border-radius:8px; border:0.5px solid var(--color-border-tertiary);">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
+      <p class="text-base sm:text-lg font-medium text-foreground">Overview</p>
+      <div class="flex gap-1 bg-muted/50 p-1 rounded-lg border border-border/50">
         <button
           v-for="tab in tabs"
           :key="tab.key"
@@ -18,7 +18,7 @@
     </div>
 
     <!-- Metric cards -->
-    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" style="margin-bottom:12px;">
+    <div class="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
       <StatCard
         v-for="m in metrics"
         :key="m.title"
@@ -29,12 +29,12 @@
       />
     </div>
 
-    <div class="grid-2" style="margin-bottom:12px;">
+    <div class="grid gap-3 sm:gap-4 lg:grid-cols-2">
       <!-- Revenue chart -->
       <div class="card">
         <p class="section-title">{{ currentTab === 'today' ? 'Revenue by hour' : 'Revenue by week' }}</p>
-        <div style="position:relative; height:150px;">
-          <svg style="width:100%; height:130px;" viewBox="0 0 400 120" preserveAspectRatio="none">
+        <div class="relative h-32 sm:h-40">
+          <svg class="w-full h-[120px] sm:h-[130px]" viewBox="0 0 400 120" preserveAspectRatio="none">
             <defs>
               <linearGradient id="ag" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" :stop-color="chartColor" stop-opacity="0.15"/>
@@ -48,8 +48,8 @@
             <path :d="chartPaths.area" fill="url(#ag)"/>
             <path :d="chartPaths.line" fill="none" :stroke="chartColor" stroke-width="2" stroke-linecap="round"/>
           </svg>
-          <div style="display:flex; justify-content:space-between; margin-top:2px;">
-            <span v-for="l in chartXLabels" :key="l" style="font-size:11px; color:var(--color-text-tertiary);">{{ l }}</span>
+          <div class="flex justify-between mt-1">
+            <span v-for="l in chartXLabels" :key="l" class="text-[10px] sm:text-xs text-muted-foreground">{{ l }}</span>
           </div>
         </div>
       </div>
@@ -66,9 +66,9 @@
             <span class="bar-val">{{ s.val }}</span>
           </div>
         </div>
-        <div style="display:flex; align-items:center; gap:14px; margin-top:10px; flex-wrap:wrap;">
-          <div :style="{ background: donutGradient }" style="width:52px; height:52px; border-radius:50%; flex-shrink:0;" />
-          <div style="font-size:12px; color:var(--color-text-secondary); line-height:2;">
+        <div class="flex items-center gap-3 sm:gap-4 mt-3 flex-wrap">
+          <div :style="{ background: donutGradient }" class="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex-shrink-0" />
+          <div class="text-xs sm:text-sm text-muted-foreground leading-relaxed">
             <div v-for="s in activeStatus" :key="s.label">
               <span :style="{ color: s.color }">●</span> {{ s.pct }}% {{ s.label.toLowerCase() }}
             </div>
@@ -80,16 +80,16 @@
     <!-- Orders volume bar chart -->
     <div class="card">
       <p class="section-title">{{ currentTab === 'today' ? 'Orders per day this week' : 'Orders per week this month' }}</p>
-      <p v-if="sourceOrders.length === 0" style="font-size:12px; color:var(--color-text-tertiary); margin-bottom:8px;">
+      <p v-if="sourceOrders.length === 0" class="text-xs sm:text-sm text-muted-foreground mb-2">
         No orders found. Create some orders to see data.
       </p>
-      <div style="display:flex; align-items:flex-end; gap:6px; height:100px;">
-        <div v-for="b in volumeBars" :key="b.label" style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px;">
-          <span style="font-size:11px; color:var(--color-text-tertiary);">{{ b.val }}</span>
-          <div style="width:100%; background:var(--color-background-secondary); border-radius:4px; height:72px; display:flex; align-items:flex-end; overflow:hidden;">
-            <div :style="{ height: b.val === 0 ? '2%' : Math.round(b.val / b.max * 100) + '%', background: b.val === 0 ? 'var(--color-border-tertiary)' : chartColor }" style="width:100%; border-radius:4px 4px 0 0; opacity:0.85;" />
+      <div class="flex items-end gap-1.5 sm:gap-2 h-24 sm:h-28">
+        <div v-for="b in volumeBars" :key="b.label" class="flex-1 flex flex-col items-center gap-1 sm:gap-1.5">
+          <span class="text-[10px] sm:text-xs text-muted-foreground">{{ b.val }}</span>
+          <div class="w-full bg-muted/50 rounded-sm sm:rounded h-16 sm:h-20 flex items-end overflow-hidden">
+            <div :style="{ height: b.val === 0 ? '2%' : Math.round(b.val / b.max * 100) + '%', background: b.val === 0 ? 'var(--color-border-tertiary)' : chartColor }" class="w-full rounded-t opacity-85" />
           </div>
-          <span style="font-size:11px; color:var(--color-text-tertiary);">{{ b.label }}</span>
+          <span class="text-[9px] sm:text-[10px] text-muted-foreground truncate w-full text-center">{{ b.label }}</span>
         </div>
       </div>
     </div>
@@ -97,22 +97,22 @@
     <!-- Top Selling Items -->
     <div class="card" v-if="topItems.length">
       <p class="section-title">Top Selling Items</p>
-      <div style="display: flex; flex-direction: column; gap: 8px;">
+      <div class="flex flex-col gap-2 sm:gap-2.5">
         <div v-for="(item, idx) in topItems.slice(0, 5)" :key="item.id" 
-             style="display: flex; align-items: center; gap: 10px; padding: 8px; background: var(--color-background-secondary); border-radius: 8px;">
-          <span style="font-size:14px; font-weight:600; color:var(--color-text-tertiary); width:24px; text-align:center;">
+             class="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-muted/30 rounded-lg">
+          <span class="text-sm sm:text-base font-semibold text-muted-foreground w-5 sm:w-6 text-center">
             {{ idx + 1 }}
           </span>
-          <div style="flex: 1;">
-            <div style="font-size:13px; font-weight:500; color:var(--color-text-primary);">
+          <div class="flex-1 min-w-0">
+            <div class="text-xs sm:text-sm font-medium text-foreground truncate">
               {{ item.name }}
             </div>
-            <div style="font-size:11px; color:var(--color-text-tertiary);">
+            <div class="text-[10px] sm:text-xs text-muted-foreground">
               {{ item.total_quantity }} sold • {{ item.category }}
             </div>
           </div>
-          <div style="text-align: right;">
-            <div style="font-size:14px; font-weight:600; color:var(--primary);">
+          <div class="text-right shrink-0">
+            <div class="text-sm sm:text-base font-semibold text-primary">
               {{ formatCurrency(item.total_revenue) }}
             </div>
           </div>
@@ -123,13 +123,13 @@
     <!-- Revenue by Category -->
     <div class="card" v-if="categoryRevenue.length">
       <p class="section-title">Revenue by Category</p>
-      <div style="display: flex; flex-direction: column; gap: 10px;">
+      <div class="flex flex-col gap-2 sm:gap-2.5">
         <div v-for="cat in categoryRevenue" :key="cat.category" class="bar-row">
-          <span class="bar-label">{{ cat.category }}</span>
+          <span class="bar-label truncate">{{ cat.category }}</span>
           <div class="bar-track">
             <div class="bar-fill" :style="{ width: cat.percentage + '%', background: chartColor }" />
           </div>
-          <span class="bar-val" style="width: 80px;">{{ formatCurrency(cat.revenue) }}</span>
+          <span class="bar-val w-16 sm:w-20 text-right">{{ formatCurrency(cat.revenue) }}</span>
         </div>
       </div>
     </div>
@@ -428,21 +428,74 @@ const volumeBars = computed(() => {
 </script>
 
 <style scoped>
-.grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
-.grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-.card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 16px; }
+.card { 
+  background: var(--color-background-primary); 
+  border: 0.5px solid var(--color-border-tertiary); 
+  border-radius: var(--border-radius-lg); 
+  padding: 12px;
+}
+@media (min-width: 640px) {
+  .card { padding: 16px; }
+}
 .label { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-tertiary); margin-bottom: 6px; }
 .big-num { font-size: 28px; font-weight: 500; color: var(--color-text-primary); line-height: 1; }
 .sub { font-size: 12px; color: var(--color-text-tertiary); margin-top: 5px; }
 .pill { display: inline-block; font-size: 11px; font-weight: 500; border-radius: 4px; padding: 2px 7px; }
 .pill-up { background: #eaf3de; color: #3b6d11; }
 .pill-down { background: #fcebeb; color: #a32d2d; }
-.section-title { font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 12px; }
-.bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-.bar-label { font-size: 12px; color: var(--color-text-secondary); width: 70px; flex-shrink: 0; text-align: right; }
+.section-title { 
+  font-size: 12px; 
+  font-weight: 500; 
+  color: var(--color-text-primary); 
+  margin-bottom: 10px; 
+}
+@media (min-width: 640px) {
+  .section-title { font-size: 13px; margin-bottom: 12px; }
+}
+.bar-row { 
+  display: flex; 
+  align-items: center; 
+  gap: 6px; 
+  margin-bottom: 8px; 
+}
+@media (min-width: 640px) {
+  .bar-row { gap: 10px; margin-bottom: 10px; }
+}
+.bar-label { 
+  font-size: 11px; 
+  color: var(--color-text-secondary); 
+  width: 60px; 
+  flex-shrink: 0; 
+  text-align: right; 
+}
+@media (min-width: 640px) {
+  .bar-label { font-size: 12px; width: 70px; }
+}
 .bar-track { flex: 1; height: 8px; background: var(--color-background-secondary); border-radius: 99px; overflow: hidden; }
 .bar-fill { height: 100%; border-radius: 99px; }
-.bar-val { font-size: 12px; color: var(--color-text-tertiary); width: 36px; flex-shrink: 0; text-align: right; }
-.tab-btn { font-size: 12px; font-weight: 500; padding: 4px 12px; border-radius: 6px; border: 0.5px solid transparent; cursor: pointer; transition: all 0.15s; background: none; color: var(--color-text-tertiary); }
+.bar-val { 
+  font-size: 11px; 
+  color: var(--color-text-tertiary); 
+  width: 32px; 
+  flex-shrink: 0; 
+  text-align: right; 
+}
+@media (min-width: 640px) {
+  .bar-val { font-size: 12px; width: 36px; }
+}
+.tab-btn { 
+  font-size: 11px; 
+  font-weight: 500; 
+  padding: 3px 10px; 
+  border-radius: 6px; 
+  border: 0.5px solid transparent; 
+  cursor: pointer; 
+  transition: all 0.15s; 
+  background: none; 
+  color: var(--color-text-tertiary); 
+}
+@media (min-width: 640px) {
+  .tab-btn { font-size: 12px; padding: 4px 12px; }
+}
 .tab-btn.active { background: var(--color-background-primary); border-color: var(--color-border-secondary); color: var(--color-text-primary); }
 </style>

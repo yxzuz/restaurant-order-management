@@ -1,7 +1,11 @@
 <template>
   <aside
-    class="sticky top-0 flex h-screen shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-all duration-200"
-    :class="collapsed ? 'w-20' : 'w-72'"
+    class="fixed lg:sticky top-0 z-50 flex h-screen shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-all duration-300"
+    :class="[
+      collapsed ? 'w-20' : 'w-72',
+      'lg:translate-x-0',
+      mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+    ]"
   >
     <div class="flex items-center justify-between border-b border-sidebar-border px-4 py-4">
       <div v-if="!collapsed" class="flex items-center gap-3">
@@ -82,9 +86,13 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  mobileOpen: {
+    type: Boolean,
+    default: false,
+  },
 })
 
-defineEmits(['toggle'])
+defineEmits(['toggle', 'close'])
 
 const route = useRoute()
 const router = useRouter()

@@ -2,40 +2,41 @@
   <div class="min-h-screen bg-background pb-20">
     <!-- Sticky Header -->
     <header class="sticky top-0 z-30 bg-card border-b">
-      <div class="container flex items-center justify-between h-14 px-4">
-        <div class="flex items-center gap-3">
+      <div class="container flex items-center justify-between h-12 sm:h-14 px-3 sm:px-4">
+        <div class="flex items-center gap-2 sm:gap-3">
           <router-link to="/">
-            <Button variant="ghost" size="icon" class="h-8 w-8">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <Button variant="ghost" size="icon" class="h-7 w-7 sm:h-8 sm:w-8">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sm:w-4 sm:h-4">
                 <path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>
               </svg>
             </Button>
           </router-link>
-          <div class="flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary">
+          <div class="flex items-center gap-1.5 sm:gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary sm:w-5 sm:h-5">
               <path d="m16 2-2.3 2.3a3 3 0 0 0 0 4.2l1.8 1.8a3 3 0 0 0 4.2 0L22 8"/><path d="M15 15 3.3 3.3a4.2 4.2 0 0 0 0 6l7.3 7.3c.7.7 2 .7 2.8 0L15 15Zm0 0 7 7"/><path d="m2.1 21.8 6.4-6.3"/><path d="m19 5-7 7"/>
             </svg>
-            <span class="font-semibold">Table {{ tableNumber }}</span>
+            <span class="font-semibold text-sm sm:text-base">Table {{ tableNumber }}</span>
           </div>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1.5 sm:gap-2">
           <Button 
             v-if="activeOrder" 
             variant="outline" 
             size="sm" 
             @click="orderHistoryOpen = true"
-            class="text-xs"
+            class="text-[10px] sm:text-xs px-2 sm:px-3 h-7 sm:h-8"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-0.5 sm:mr-1 sm:w-3.5 sm:h-3.5">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
             </svg>
-            My Order
+            <span class="hidden sm:inline">My Order</span>
+            <span class="sm:hidden">Order</span>
           </Button>
-          <Button variant="outline" size="icon" class="relative" @click="cartDrawerOpen = true">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <Button variant="outline" size="icon" class="relative h-7 w-7 sm:h-9 sm:w-9" @click="cartDrawerOpen = true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sm:w-4 sm:h-4">
               <circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
             </svg>
-            <Badge v-if="cartItemCount > 0" class="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-[10px]">
+            <Badge v-if="cartItemCount > 0" class="absolute -top-1.5 -right-1.5 sm:-top-2 sm:-right-2 h-4 w-4 sm:h-5 sm:w-5 p-0 flex items-center justify-center text-[9px] sm:text-[10px]">
               {{ cartItemCount }}
             </Badge>
           </Button>
@@ -43,11 +44,11 @@
       </div>
     </header>
 
-    <section class="container px-4 py-4">
+    <section class="container px-3 sm:px-4 py-3 sm:py-4">
       <!-- Error Message -->
       <div
         v-if="pageError"
-        class="mb-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+        class="mb-3 sm:mb-4 rounded-xl sm:rounded-2xl border border-red-200 bg-red-50 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-red-700"
       >
         {{ pageError }}
       </div>
@@ -55,27 +56,27 @@
       <!-- QR Required Message -->
       <div
         v-if="requiresQrAccess"
-        class="rounded-3xl border border-border bg-card p-8 shadow-sm"
+        class="rounded-2xl sm:rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm"
       >
-        <p class="text-sm font-semibold uppercase tracking-[0.28em] text-orange-600">
+        <p class="text-xs sm:text-sm font-semibold uppercase tracking-[0.28em] text-orange-600">
           QR required
         </p>
-        <h2 class="mt-3 text-3xl font-semibold text-foreground">
+        <h2 class="mt-2 sm:mt-3 text-2xl sm:text-3xl font-semibold text-foreground">
           Scan the table QR code first.
         </h2>
-        <p class="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">
+        <p class="mt-3 sm:mt-4 max-w-2xl text-sm sm:text-base leading-6 sm:leading-7 text-muted-foreground">
           This page needs a valid table token from the QR code so the order is attached to the correct table.
         </p>
-        <div class="mt-6 flex flex-wrap gap-3">
+        <div class="mt-5 sm:mt-6 flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3">
           <router-link
             to="/customer"
-            class="rounded-2xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
+            class="text-center rounded-xl sm:rounded-2xl bg-primary px-4 sm:px-5 py-2.5 sm:py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
           >
             Go to QR access page
           </router-link>
           <router-link
             to="/"
-            class="rounded-2xl border border-border px-5 py-3 text-sm font-medium text-foreground transition hover:bg-accent"
+            class="text-center rounded-xl sm:rounded-2xl border border-border px-4 sm:px-5 py-2.5 sm:py-3 text-sm font-medium text-foreground transition hover:bg-accent"
           >
             Back to home
           </router-link>
@@ -94,14 +95,14 @@
 
         <template v-else>
           <!-- Category Filters -->
-          <div class="flex gap-2 overflow-x-auto pb-2 mb-4 scrollbar-none">
+          <div class="flex gap-1.5 sm:gap-2 overflow-x-auto pb-2 mb-3 sm:mb-4 scrollbar-none">
             <Button
               v-for="category in categories"
               :key="category"
               :variant="selectedCategory === category ? 'default' : 'outline'"
               size="sm"
               @click="selectedCategory = category"
-              class="shrink-0"
+              class="shrink-0 text-xs sm:text-sm px-3 sm:px-4 h-8 sm:h-9"
             >
               {{ category }}
             </Button>
@@ -110,11 +111,11 @@
           <!-- Menu Items -->
           <div
             v-if="filteredMenuItems.length === 0"
-            class="rounded-3xl border border-dashed border-border bg-card px-6 py-16 text-center text-sm text-muted-foreground"
+            class="rounded-2xl sm:rounded-3xl border border-dashed border-border bg-card px-4 sm:px-6 py-12 sm:py-16 text-center text-xs sm:text-sm text-muted-foreground"
           >
             No dishes found for this category.
           </div>
-          <div v-else class="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+          <div v-else class="grid gap-2 sm:gap-2.5 grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             <CustomerMenuItemCard
               v-for="item in filteredMenuItems"
               :key="item.id"
