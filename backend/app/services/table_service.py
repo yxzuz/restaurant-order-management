@@ -18,7 +18,8 @@ class TableService:
         return self.table_repository.get_by_number_and_qr_token(table_number, qr_token)
 
     def create_table(self, number: int, restaurant_id: int):
-        existing_table = self.table_repository.get_by_number(number, restaurant_id)
+        existing_table = self.table_repository.get_by_number(
+            number, restaurant_id)
         if existing_table is not None:
             raise ValueError(f"Table {number} already exists")
 
@@ -30,12 +31,14 @@ class TableService:
         )
 
     def delete_table(self, table_number: int, restaurant_id: int) -> bool:
-        table = self.table_repository.get_by_number(table_number, restaurant_id)
+        table = self.table_repository.get_by_number(
+            table_number, restaurant_id)
         if table is None:
             return False
 
         if self.order_repository.has_orders_for_table_id(table.id):
-            raise ValueError("Table cannot be deleted because it has order history")
+            raise ValueError(
+                "Table cannot be deleted because it has order history")
 
         self.table_repository.delete(table)
         return True

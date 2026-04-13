@@ -8,7 +8,8 @@ class UserRepository:
         self.db = db
 
     def create(self, *, username: str, hashed_password: str, restaurant_id: int, role: UserRole = UserRole.STAFF) -> User:
-        user = User(username=username, hashed_password=hashed_password, restaurant_id=restaurant_id, role=role)
+        user = User(username=username, hashed_password=hashed_password,
+                    restaurant_id=restaurant_id, role=role)
         self.db.add(user)
         self.db.commit()
         self.db.refresh(user)
@@ -45,7 +46,7 @@ class UserRepository:
     def delete(self, user: User) -> None:
         self.db.delete(user)
         self.db.commit()
-        
+
     def find_existing_user(self, username: str, restaurant_id: int) -> User | None:
         return self.db.query(User).filter(
             User.username == username,

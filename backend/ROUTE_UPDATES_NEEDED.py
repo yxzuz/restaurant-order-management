@@ -11,10 +11,14 @@ This file contains exact code changes needed for each route file.
 
 # CHANGE 1: list_tables
 # OLD:
+
+
 def list_tables(current_user: User = Depends(require_staff_or_owner), db: Session = Depends(get_db)):
     return TableService(db).list_tables()
 
 # NEW:
+
+
 def list_tables(current_user: User = Depends(require_staff_or_owner), db: Session = Depends(get_db)):
     return TableService(db).list_tables(current_user.restaurant_id)
 
@@ -84,7 +88,7 @@ def list_tables(current_user: User = Depends(require_staff_or_owner), db: Sessio
 # NEW:
     return service.list_active_orders(current_user.restaurant_id)
 
-# NOTE: create_order (customer endpoint) doesn't have current_user, 
+# NOTE: create_order (customer endpoint) doesn't have current_user,
 # it extracts restaurant_id from table ✅ Already handled in service
 
 
@@ -106,7 +110,7 @@ def list_tables(current_user: User = Depends(require_staff_or_owner), db: Sessio
 After making these changes, verify:
 
 1. ✅ Services receive restaurant_id
-2. ✅ Repositories filter by restaurant_id  
+2. ✅ Repositories filter by restaurant_id
 3. ✅ JWT includes restaurant_id
 4. ✅ Registration creates restaurant + owner
 5. ✅ Login works across restaurants

@@ -22,7 +22,8 @@ class Table(Base):
         nullable=False,
         default=TableStatus.AVAILABLE,
     )
-    restaurant_id = Column(Integer, ForeignKey("restaurants.id"), nullable=False, index=True)
+    restaurant_id = Column(Integer, ForeignKey(
+        "restaurants.id"), nullable=False, index=True)
 
     restaurant = relationship("Restaurant", back_populates="tables")
     orders = relationship("Order", back_populates="table")

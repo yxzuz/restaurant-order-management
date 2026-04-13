@@ -54,7 +54,8 @@ def create_menu_item(
     image_url = None
     if image is not None:
         try:
-            image_url = service.upload_menu_image(image, current_user.restaurant_id)
+            image_url = service.upload_menu_image(
+                image, current_user.restaurant_id)
         except ValueError as exc:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
@@ -97,7 +98,8 @@ def update_menu_item(
         changes["is_available"] = is_available
     if image is not None:
         try:
-            changes["image_url"] = service.upload_menu_image(image, current_user.restaurant_id)
+            changes["image_url"] = service.upload_menu_image(
+                image, current_user.restaurant_id)
         except ValueError as exc:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc

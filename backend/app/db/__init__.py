@@ -34,11 +34,12 @@ def _seed_tables():
     db = SessionLocal()
     try:
         # Get default restaurant or skip seeding
-        default_restaurant = db.query(Restaurant).filter(Restaurant.id == 1).first()
+        default_restaurant = db.query(Restaurant).filter(
+            Restaurant.id == 1).first()
         if not default_restaurant:
             print("No default restaurant found, skipping table seeding")
             return
-            
+
         if db.query(Table).filter(Table.restaurant_id == default_restaurant.id).count() == 0:
             db.add_all(
                 [

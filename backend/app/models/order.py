@@ -27,7 +27,8 @@ class Order(Base):
     id = Column(Integer, primary_key=True, index=True)
     table_id = Column(Integer, ForeignKey("tables.id"),
                       nullable=False, index=True)
-    restaurant_id = Column(Integer, ForeignKey("restaurants.id"), nullable=False, index=True)
+    restaurant_id = Column(Integer, ForeignKey(
+        "restaurants.id"), nullable=False, index=True)
     status = Column(
         SQLEnum(OrderStatus, name="order_status"),
         nullable=False,

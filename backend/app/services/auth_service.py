@@ -37,12 +37,12 @@ class AuthService:
         for restaurant in existing_restaurants:
             if self.user_repository.find_existing_user(username, restaurant.id):
                 raise ValueError("Username already exists")
-        
+
         # Create restaurant
         restaurant = self.restaurant_repository.create(
             RestaurantCreate(name=restaurant_name)
         )
-        
+
         # Create owner user
         owner = self._create_user(
             username=username,
@@ -50,14 +50,15 @@ class AuthService:
             restaurant_id=restaurant.id,
             role=UserRole.OWNER,
         )
-        
+
         # Create access token
         expires_delta = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         token = self.create_access_token(
-            data={"sub": str(owner.id), "role": owner.role.value, "restaurant_id": restaurant.id},
+            data={"sub": str(owner.id), "role": owner.role.value,
+                  "restaurant_id": restaurant.id},
             expires_delta=expires_delta,
         )
-        
+
         return owner, token
 
     def bootstrap_owner(self, payload: OwnerBootstrapCreate, restaurant_id: int = 1) -> User:
@@ -95,23 +96,26 @@ class AuthService:
         all_restaurants = self.restaurant_repository.get_all()
         user = None
         for restaurant in all_restaurants:
-            user = self.user_repository.get_by_username(payload.username, restaurant.id)
+            user = self.user_repository.get_by_username(
+                payload.username, restaurant.id)
             if user and bcrypt_context.verify(payload.password, user.hashed_password):
                 break
             user = None
-        
+
         if user is None:
             raise ValueError("Invalid username or password")
 
         expires_delta = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         return self.create_access_token(
-            data={"sub": str(user.id), "role": user.role.value, "restaurant_id": user.restaurant_id},
+            data={"sub": str(user.id), "role": user.role.value,
+                  "restaurant_id": user.restaurant_id},
             expires_delta=expires_delta,
         )
 
     def get_current_user(self, token: str) -> User:
         try:
-            payload = jwt.decode(token, settings.SECRET_KEY.get_secret_value(), algorithms=[settings.ALGORITHM])
+            payload = jwt.decode(
+                token, settings.SECRET_KEY.get_secret_value(), algorithms=[settings.ALGORITHM])
             user_id = payload.get("sub")
             if user_id is None:
                 raise credentials_exception

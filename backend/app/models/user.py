@@ -22,6 +22,7 @@ class User(Base):
         nullable=False,
         default=UserRole.STAFF,
     )
-    restaurant_id = Column(Integer, ForeignKey("restaurants.id"), nullable=False, index=True)
+    restaurant_id = Column(Integer, ForeignKey(
+        "restaurants.id"), nullable=False, index=True)
 
     restaurant = relationship("Restaurant", back_populates="users")

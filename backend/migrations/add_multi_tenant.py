@@ -8,6 +8,7 @@ This script:
 4. Associates all existing data with the default restaurant
 """
 
+from app.core.config import settings
 import psycopg2
 import sys
 import os
@@ -17,7 +18,6 @@ from pathlib import Path
 backend_dir = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(backend_dir))
 
-from app.core.config import settings
 
 def migrate():
     # Parse DATABASE_URL
@@ -25,13 +25,13 @@ def migrate():
     if not db_url.startswith('postgresql://'):
         print("Error: This migration is for PostgreSQL only")
         return False
-        
+
     conn = psycopg2.connect(db_url)
     cursor = conn.cursor()
-    
+
     try:
         print("Starting multi-tenant migration...")
-        
+
         # 1. Create restaurants table
         print("Creating restaurants table...")
         cursor.execute("""
@@ -41,9 +41,11 @@ def migrate():
                 created_at TIMESTAMP NOT NULL DEFAULT NOW()
             );
         """)
-        cursor.execute("CREATE INDEX IF NOT EXISTS ix_restaurants_id ON restaurants(id);")
-        cursor.execute("CREATE INDEX IF NOT EXISTS ix_restaurants_name ON restaurants(name);")
-        
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS ix_restaurants_id ON restaurants(id);")
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS ix_restaurants_name ON restaurants(name);")
+
         # 2. Create default restaurant
         print("Creating default restaurant...")
         cursor.execute("""
@@ -56,11 +58,12 @@ def migrate():
         if result:
             default_restaurant_id = result[0]
         else:
-            cursor.execute("SELECT id FROM restaurants WHERE name = 'Default Restaurant' LIMIT 1;")
+            cursor.execute(
+                "SELECT id FROM restaurants WHERE name = 'Default Restaurant' LIMIT 1;")
             default_restaurant_id = cursor.fetchone()[0]
-        
+
         print(f"Default restaurant ID: {default_restaurant_id}")
-        
+
         # 3. Add restaurant_id to users table
         print("Adding restaurant_id to users table...")
         cursor.execute("""
@@ -83,9 +86,11 @@ def migrate():
             ON UPDATE NO ACTION ON DELETE NO ACTION
             NOT VALID;
         """)
-        cursor.execute("ALTER TABLE users VALIDATE CONSTRAINT users_restaurant_id_fkey;")
-        cursor.execute("CREATE INDEX IF NOT EXISTS ix_users_restaurant_id ON users(restaurant_id);")
-        
+        cursor.execute(
+            "ALTER TABLE users VALIDATE CONSTRAINT users_restaurant_id_fkey;")
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS ix_users_restaurant_id ON users(restaurant_id);")
+
         # Remove unique constraint on username, make it unique per restaurant
         cursor.execute("""
             ALTER TABLE users DROP CONSTRAINT IF EXISTS users_username_key;
@@ -94,7 +99,7 @@ def migrate():
             CREATE UNIQUE INDEX IF NOT EXISTS users_username_restaurant_key 
             ON users(username, restaurant_id);
         """)
-        
+
         # 4. Add restaurant_id to tables table
         print("Adding restaurant_id to tables table...")
         cursor.execute("""
@@ -117,9 +122,11 @@ def migrate():
             ON UPDATE NO ACTION ON DELETE NO ACTION
             NOT VALID;
         """)
-        cursor.execute("ALTER TABLE tables VALIDATE CONSTRAINT tables_restaurant_id_fkey;")
-        cursor.execute("CREATE INDEX IF NOT EXISTS ix_tables_restaurant_id ON tables(restaurant_id);")
-        
+        cursor.execute(
+            "ALTER TABLE tables VALIDATE CONSTRAINT tables_restaurant_id_fkey;")
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS ix_tables_restaurant_id ON tables(restaurant_id);")
+
         # Remove unique constraint on table number, make it unique per restaurant
         cursor.execute("""
             DROP INDEX IF EXISTS ix_tables_number;
@@ -131,7 +138,7 @@ def migrate():
             CREATE UNIQUE INDEX IF NOT EXISTS tables_number_restaurant_key 
             ON tables(number, restaurant_id);
         """)
-        
+
         # 5. Add restaurant_id to menu_items table
         print("Adding restaurant_id to menu_items table...")
         cursor.execute("""
@@ -154,9 +161,11 @@ def migrate():
             ON UPDATE NO ACTION ON DELETE NO ACTION
             NOT VALID;
         """)
-        cursor.execute("ALTER TABLE menu_items VALIDATE CONSTRAINT menu_items_restaurant_id_fkey;")
-        cursor.execute("CREATE INDEX IF NOT EXISTS ix_menu_items_restaurant_id ON menu_items(restaurant_id);")
-        
+        cursor.execute(
+            "ALTER TABLE menu_items VALIDATE CONSTRAINT menu_items_restaurant_id_fkey;")
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS ix_menu_items_restaurant_id ON menu_items(restaurant_id);")
+
         # 6. Add restaurant_id to orders table
         print("Adding restaurant_id to orders table...")
         cursor.execute("""
@@ -179,14 +188,17 @@ def migrate():
             ON UPDATE NO ACTION ON DELETE NO ACTION
             NOT VALID;
         """)
-        cursor.execute("ALTER TABLE orders VALIDATE CONSTRAINT orders_restaurant_id_fkey;")
-        cursor.execute("CREATE INDEX IF NOT EXISTS ix_orders_restaurant_id ON orders(restaurant_id);")
-        
+        cursor.execute(
+            "ALTER TABLE orders VALIDATE CONSTRAINT orders_restaurant_id_fkey;")
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS ix_orders_restaurant_id ON orders(restaurant_id);")
+
         conn.commit()
         print("\n✅ Migration completed successfully!")
-        print(f"All existing data has been associated with restaurant: 'Default Restaurant' (ID: {default_restaurant_id})")
+        print(
+            f"All existing data has been associated with restaurant: 'Default Restaurant' (ID: {default_restaurant_id})")
         return True
-        
+
     except Exception as e:
         conn.rollback()
         print(f"\n❌ Migration failed: {e}")
@@ -194,6 +206,7 @@ def migrate():
     finally:
         cursor.close()
         conn.close()
+
 
 if __name__ == "__main__":
     success = migrate()

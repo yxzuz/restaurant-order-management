@@ -34,7 +34,8 @@ class TableRepository:
         restaurant_id: int,
         status: TableStatus = TableStatus.AVAILABLE,
     ) -> Table:
-        table = Table(number=number, qr_token=qr_token, restaurant_id=restaurant_id, status=status)
+        table = Table(number=number, qr_token=qr_token,
+                      restaurant_id=restaurant_id, status=status)
         self.db.add(table)
         self.db.commit()
         self.db.refresh(table)
