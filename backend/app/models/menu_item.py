@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, Integer, Numeric, String
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, Numeric, String
 from sqlalchemy.orm import relationship
 
 from app.db import Base
@@ -14,5 +14,7 @@ class MenuItem(Base):
     is_available = Column(Boolean, nullable=False, default=True)
     category = Column(String, nullable=False, default="main_course")
     image_url = Column(String, nullable=True)
+    restaurant_id = Column(Integer, ForeignKey("restaurants.id"), nullable=False, index=True)
 
+    restaurant = relationship("Restaurant", back_populates="menu_items")
     order_items = relationship("OrderItem", back_populates="menu_item")

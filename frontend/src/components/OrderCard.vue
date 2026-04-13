@@ -31,7 +31,7 @@
 
         <div class="text-left sm:text-right">
           <p class="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">Total</p>
-          <p class="mt-1 text-2xl font-semibold text-orange-600">฿{{ totalAmount }}</p>
+          <p class="mt-1 text-2xl font-semibold text-orange-600">{{ formatCurrency(order.total_amount) }}</p>
         </div>
       </div>
 
@@ -53,7 +53,7 @@
                 </div>
                 <p class="text-xs text-muted-foreground">Qty {{ item.quantity }}</p>
               </div>
-              <p class="text-sm font-semibold text-foreground">฿{{ getOrderItemSubtotal(item).toFixed(2) }}</p>
+              <p class="text-sm font-semibold text-foreground">{{ formatCurrency(getOrderItemSubtotal(item)) }}</p>
             </div>
             <div class="flex gap-2">
               <button
@@ -138,7 +138,13 @@ const props = defineProps({
 
 defineEmits(['advance-status', 'cancel-order', 'mark-paid', 'advance-item-status', 'cancel-item'])
 
-const totalAmount = computed(() => Number(props.order.total_amount).toFixed(2))
+const formatCurrency = (value) => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'THB',
+  }).format(value)
+}
+
 const normalizedStatus = computed(() => String(props.order.status || '').toLowerCase())
 const normalizedPaymentStatus = computed(() => String(props.order.payment_status || props.order.paymentStatus || 'unpaid').toLowerCase())
 const isPaid = computed(() => normalizedPaymentStatus.value === 'paid')
@@ -185,12 +191,13 @@ const formattedTime = computed(() => {
     return 'Unknown time'
   }
 
-  return createdAt.toLocaleString('th-TH', {
+  return createdAt.toLocaleString('en-US', {
     timeZone: 'Asia/Bangkok',
     month: 'short',
     day: 'numeric',
     hour: 'numeric',
     minute: '2-digit',
+    hour12: true,
   })
 })
 

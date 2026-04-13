@@ -29,11 +29,11 @@ class OrderService:
         self.menu_item_repository = MenuItemRepository(db_session)
         self.table_repository = TableRepository(db_session)
 
-    def list_orders(self):
-        return self.order_repository.list_all()
+    def list_orders(self, restaurant_id: int):
+        return self.order_repository.list_all(restaurant_id)
 
-    def list_active_orders(self):
-        return self.order_repository.list_active()
+    def list_active_orders(self, restaurant_id: int):
+        return self.order_repository.list_active(restaurant_id)
 
     def create_order(self, order_data):
         table = self._get_table_by_access(
@@ -41,7 +41,10 @@ class OrderService:
 
         order = self.order_repository.get_active_by_table_id(table.id)
         if order is None:
-            order = self.order_repository.create_order(table_id=table.id)
+            order = self.order_repository.create_order(
+                table_id=table.id,
+                restaurant_id=table.restaurant_id
+            )
             self.table_repository.update_status(table, TableStatus.OCCUPIED)
 
         for item_data in order_data.get("items", []):
@@ -178,13 +181,10 @@ class OrderService:
         return True
 
     def _get_table_by_access(self, table_number: int, qr_token: str):
-        table = self.table_repository.get_by_number(table_number)
-        if table is None:
-            raise LookupError(f"Table {table_number} not found")
-
-        matched_table = self.table_repository.get_by_number_and_qr_token(
+        # Get table by number and QR token (QR token is globally unique)
+        table = self.table_repository.get_by_number_and_qr_token(
             table_number, qr_token)
-        if matched_table is None:
-            raise PermissionError("Invalid QR token for table")
+        if table is None:
+            raise PermissionError("Invalid table number or QR token")
 
-        return matched_table
+        return table

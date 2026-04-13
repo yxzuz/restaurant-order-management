@@ -16,13 +16,13 @@ class MenuService:
         self.menu_item_repository = MenuItemRepository(db_session)
         self.s3 = s3_client_service
 
-    def upload_menu_image(self, image: UploadFile) -> str:
+    def upload_menu_image(self, image: UploadFile, restaurant_id: int) -> str:
         content_type = image.content_type or ""
         if not content_type.startswith("image/"):
             raise ValueError("Only image files are allowed")
 
         extension = Path(image.filename or "").suffix or ".jpg"
-        object_key = f"menu-items/{uuid4().hex}{extension}"
+        object_key = f"restaurant-{restaurant_id}/menu-items/{uuid4().hex}{extension}"
         try:
             return self.s3.upload_file(
                 file_stream=image.file,
@@ -58,6 +58,8 @@ class MenuService:
         self,
         name: str,
         price: float,
+        restaurant_id: int,
+        description: str | None = None,
         is_available: bool = True,
         category: MenuCategory = MenuCategory.MAIN_COURSE,
         image_url: str | None = None,
@@ -65,6 +67,8 @@ class MenuService:
         menu_item = self.menu_item_repository.create(
             name=name,
             price=price,
+            description=description,
+            restaurant_id=restaurant_id,
             is_available=is_available,
             category=category.value,
             image_url=image_url,
@@ -86,8 +90,8 @@ class MenuService:
             raise ValueError(f"Menu item with id {item_id} not found")
         self.menu_item_repository.delete(menu_item)
 
-    def list_menu_items(self) -> list[MenuItem]:
-        items = self.menu_item_repository.list_all()
+    def list_menu_items(self, restaurant_id: int) -> list[MenuItem]:
+        items = self.menu_item_repository.list_all(restaurant_id)
         return [self._resolve_item_image_url(item) for item in items]
 
     def _resolve_item_image_url(self, menu_item: MenuItem | None) -> MenuItem | None:

@@ -1,6 +1,8 @@
 from enum import Enum
 
-from sqlalchemy import Column, Enum as SQLEnum, Integer, String
+from sqlalchemy import Column, Enum as SQLEnum, ForeignKey, Integer, String
+from sqlalchemy.orm import relationship
+
 from app.db import Base
 
 
@@ -20,3 +22,6 @@ class User(Base):
         nullable=False,
         default=UserRole.STAFF,
     )
+    restaurant_id = Column(Integer, ForeignKey("restaurants.id"), nullable=False, index=True)
+
+    restaurant = relationship("Restaurant", back_populates="users")

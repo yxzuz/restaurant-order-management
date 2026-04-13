@@ -8,7 +8,10 @@
           <p class="text-xs font-medium uppercase tracking-[0.25em] text-muted-foreground">
             {{ role === 'owner' ? 'Owner Portal' : 'Staff Portal' }}
           </p>
-          <p class="mt-1 text-sm text-foreground">Restaurant order operations</p>
+          <p class="mt-1 text-sm text-foreground">
+            <span v-if="restaurantName" class="font-semibold">{{ restaurantName }}</span>
+            <span v-else>Restaurant order operations</span>
+          </p>
         </div>
       </header>
 
@@ -20,7 +23,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 
 import AppSidebar from '@/components/AppSidebar.vue'
 
@@ -32,8 +35,13 @@ defineProps({
 })
 
 const sidebarCollapsed = ref(false)
+const restaurantName = ref('')
 
 function toggleSidebar() {
   sidebarCollapsed.value = !sidebarCollapsed.value
 }
+
+onMounted(() => {
+  restaurantName.value = localStorage.getItem('restaurant_name') || ''
+})
 </script>

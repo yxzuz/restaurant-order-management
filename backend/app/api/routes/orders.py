@@ -1,7 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.api.dependencies.auth import get_current_user
 from app.db import get_db
+from app.models.user import User
 from app.schemas.order import OrderCreate, OrderPaymentUpdate, OrderRead, OrderUpdate
 from app.schemas.order_item import OrderItemStatusUpdate
 from app.services.order_service import OrderService
@@ -10,15 +12,21 @@ router = APIRouter()
 
 
 @router.get("/", response_model=list[OrderRead])
-def list_orders(db: Session = Depends(get_db)):
+def list_orders(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     service = OrderService(db)
-    return service.list_orders()
+    return service.list_orders(current_user.restaurant_id)
 
 
 @router.get("/active", response_model=list[OrderRead])
-def list_active_orders(db: Session = Depends(get_db)):
+def list_active_orders(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     service = OrderService(db)
-    return service.list_active_orders()
+    return service.list_active_orders(current_user.restaurant_id)
 
 
 @router.get("/{order_id}", response_model=OrderRead)

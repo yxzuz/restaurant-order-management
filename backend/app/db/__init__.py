@@ -21,7 +21,7 @@ def get_db():
 
 
 def init_db():
-    from app.models import menu_item, order, order_item, table, user
+    from app.models import menu_item, order, order_item, restaurant, table, user
 
     Base.metadata.create_all(bind=engine)
     _seed_tables()
@@ -29,15 +29,23 @@ def init_db():
 
 def _seed_tables():
     from app.models.table import Table, TableStatus
+    from app.models.restaurant import Restaurant
 
     db = SessionLocal()
     try:
-        if db.query(Table).count() == 0:
+        # Get default restaurant or skip seeding
+        default_restaurant = db.query(Restaurant).filter(Restaurant.id == 1).first()
+        if not default_restaurant:
+            print("No default restaurant found, skipping table seeding")
+            return
+            
+        if db.query(Table).filter(Table.restaurant_id == default_restaurant.id).count() == 0:
             db.add_all(
                 [
                     Table(
                         number=number,
                         qr_token=_generate_qr_token(),
+                        restaurant_id=default_restaurant.id,
                         status=TableStatus.AVAILABLE,
                     )
                     for number in range(1, 11)

@@ -22,9 +22,17 @@ class LoginRequest(BaseModel):
     password: str = Field(min_length=4, max_length=72)
 
 
+class RegistrationRequest(BaseModel):
+    username: str = Field(min_length=3, max_length=50)
+    password: str = Field(min_length=4, max_length=72)
+    restaurant_name: str = Field(min_length=3, max_length=100)
+
+
 class UserRead(UserBase):
     id: int
     role: UserRole
+    restaurant_id: int
+    restaurant_name: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 

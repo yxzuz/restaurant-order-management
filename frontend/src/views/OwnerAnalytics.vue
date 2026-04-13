@@ -113,7 +113,7 @@
           </div>
           <div style="text-align: right;">
             <div style="font-size:14px; font-weight:600; color:var(--primary);">
-              ฿{{ item.total_revenue.toFixed(2) }}
+              {{ formatCurrency(item.total_revenue) }}
             </div>
           </div>
         </div>
@@ -129,7 +129,7 @@
           <div class="bar-track">
             <div class="bar-fill" :style="{ width: cat.percentage + '%', background: chartColor }" />
           </div>
-          <span class="bar-val" style="width: 80px;">฿{{ cat.revenue.toFixed(2) }}</span>
+          <span class="bar-val" style="width: 80px;">{{ formatCurrency(cat.revenue) }}</span>
         </div>
       </div>
     </div>
@@ -239,6 +239,12 @@ function totalRevenue(orders) {
 function avgOrder(orders) {
   return orders.length ? totalRevenue(orders) / orders.length : 0
 }
+function formatCurrency(value) {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'THB',
+  }).format(Number(value) || 0)
+}
 
 // ── metrics ───────────────────────────────────────────────────────────────────
 
@@ -251,9 +257,9 @@ const metrics = computed(() => {
   const avgDelta     = pctDelta(avgOrder(curr), avgOrder(prev))
 
   return [
-    { title: 'Orders', value: curr.length.toLocaleString(), delta: countDelta.str, icon: ShoppingBag },
-    { title: 'Revenue', value: '฿' + totalRevenue(curr).toFixed(2), delta: revDelta.str, icon: DollarSign },
-    { title: 'Avg Order', value: '฿' + avgOrder(curr).toFixed(2), delta: avgDelta.str, icon: Clock3 },
+    { title: 'Orders', value: curr.length.toLocaleString('en-US'), delta: countDelta.str, icon: ShoppingBag },
+    { title: 'Revenue', value: formatCurrency(totalRevenue(curr)), delta: revDelta.str, icon: DollarSign },
+    { title: 'Avg Order', value: formatCurrency(avgOrder(curr)), delta: avgDelta.str, icon: Clock3 },
     { title: 'Avg Prep Time', value: avgPrepTime.value, delta: prepDelta.value.str, icon: Timer },
   ]
 })

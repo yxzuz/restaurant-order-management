@@ -14,10 +14,11 @@ class OrderRepository:
         self,
         *,
         table_id: int,
+        restaurant_id: int,
         status: OrderStatus = OrderStatus.NEW,
         payment_status: PaymentStatus = PaymentStatus.UNPAID,
     ) -> Order:
-        order = Order(table_id=table_id, status=status,
+        order = Order(table_id=table_id, restaurant_id=restaurant_id, status=status,
                       payment_status=payment_status)
         self.db.add(order)
         self.db.commit()
@@ -32,18 +33,20 @@ class OrderRepository:
             .first()
         )
 
-    def list_all(self) -> list[Order]:
+    def list_all(self, restaurant_id: int) -> list[Order]:
         return (
             self.db.query(Order)
             .options(joinedload(Order.table), joinedload(Order.items).joinedload(OrderItem.menu_item))
+            .filter(Order.restaurant_id == restaurant_id)
             .order_by(Order.created_at.desc())
             .all()
         )
 
-    def list_active(self) -> list[Order]:
+    def list_active(self, restaurant_id: int) -> list[Order]:
         return (
             self.db.query(Order)
             .options(joinedload(Order.table), joinedload(Order.items).joinedload(OrderItem.menu_item))
+            .filter(Order.restaurant_id == restaurant_id)
             .filter(Order.payment_status == PaymentStatus.UNPAID)
             .filter(Order.status != OrderStatus.CANCELLED)
             .order_by(Order.created_at.asc())

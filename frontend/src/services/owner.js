@@ -136,6 +136,10 @@ function buildMenuItemFormData(payload) {
   formData.append('category', payload.category)
   formData.append('is_available', String(payload.is_available))
 
+  if (payload.description) {
+    formData.append('description', payload.description)
+  }
+
   if (payload.imageFile instanceof File) {
     formData.append('image', payload.imageFile)
   }

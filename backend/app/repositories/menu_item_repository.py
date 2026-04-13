@@ -7,10 +7,12 @@ class MenuItemRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def create(self, *, name: str, price, is_available: bool = True, category: str = "main course", image_url: str | None = None) -> MenuItem:
+    def create(self, *, name: str, price, restaurant_id: int, description: str | None = None, is_available: bool = True, category: str = "main course", image_url: str | None = None) -> MenuItem:
         menu_item = MenuItem(
             name=name,
             price=price,
+            description=description,
+            restaurant_id=restaurant_id,
             is_available=is_available,
             category=category,
             image_url=image_url,
@@ -23,8 +25,8 @@ class MenuItemRepository:
     def get_by_id(self, menu_item_id: int) -> MenuItem | None:
         return self.db.query(MenuItem).filter(MenuItem.id == menu_item_id).first()
 
-    def list_all(self) -> list[MenuItem]:
-        return self.db.query(MenuItem).all()
+    def list_all(self, restaurant_id: int) -> list[MenuItem]:
+        return self.db.query(MenuItem).filter(MenuItem.restaurant_id == restaurant_id).all()
 
     def update(self, menu_item: MenuItem, **changes) -> MenuItem:
         for field, value in changes.items():

@@ -43,10 +43,10 @@
       </div>
 
       <p
-        v-if="requiredRole === 'owner'"
+        v-if="requiredRole === 'owner' && mode === 'create'"
         class="mb-4 text-xs text-gray-500"
       >
-        Use "Create account" only for first-time owner setup.
+        Register your restaurant and create your owner account.
       </p>
 
       <p
@@ -57,6 +57,14 @@
       </p>
 
       <form @submit.prevent="handleLogin">
+
+        <input
+          v-if="requiredRole === 'owner' && mode === 'create'"
+          v-model="restaurantName"
+          type="text"
+          placeholder="Restaurant Name"
+          class="w-full mb-4 p-3 border rounded"
+        />
 
         <input
           v-model="username"
@@ -97,6 +105,7 @@ const emit = defineEmits(['close', 'success'])
 
 const username = ref('')
 const password = ref('')
+const restaurantName = ref('')
 const errorMessage = ref('')
 const loading = ref(false)
 const mode = ref('login')
@@ -109,7 +118,7 @@ const title = computed(() => {
 
 const submitLabel = computed(() => {
   if (props.requiredRole === 'owner' && mode.value === 'create') {
-    return 'Create owner account'
+    return 'Register Restaurant'
   }
   return 'Login'
 })
@@ -129,10 +138,36 @@ async function handleLogin() {
       return
     }
 
+    // Registration flow for new restaurants
     if (props.requiredRole === 'owner' && mode.value === 'create') {
-      await api.post('/auth/bootstrap-owner', payload)
+      if (!restaurantName.value.trim()) {
+        errorMessage.value = 'Please enter your restaurant name.'
+        return
+      }
+      
+      const registerPayload = {
+        ...payload,
+        restaurant_name: restaurantName.value.trim(),
+      }
+      
+      const tokenResponse = await api.post('/auth/register', registerPayload)
+      const accessToken = tokenResponse.access_token
+      if (!accessToken) {
+        throw new Error('Registration token missing')
+      }
+      
+      localStorage.setItem('token', accessToken)
+      
+      const me = await api.get('/auth/me')
+      localStorage.setItem('user_role', me.role)
+      if (me.restaurant_name) {
+        localStorage.setItem('restaurant_name', me.restaurant_name)
+      }
+      emit('success', { role: me.role })
+      return
     }
 
+    // Login flow
     const tokenResponse = await api.post('/auth/login', payload)
     const accessToken = tokenResponse.access_token
     if (!accessToken) {
@@ -145,11 +180,15 @@ async function handleLogin() {
     if (props.requiredRole && me.role !== props.requiredRole) {
       localStorage.removeItem('token')
       localStorage.removeItem('user_role')
+      localStorage.removeItem('restaurant_name')
       errorMessage.value = `This account is ${me.role}. Please use a ${props.requiredRole} account.`
       return
     }
 
     localStorage.setItem('user_role', me.role)
+    if (me.restaurant_name) {
+      localStorage.setItem('restaurant_name', me.restaurant_name)
+    }
     emit('success', { role: me.role })
   } catch (error) {
     const status = error?.response?.status

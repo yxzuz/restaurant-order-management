@@ -4,8 +4,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi import File, Form, UploadFile
 from sqlalchemy.orm import Session
 
-from app.api.dependencies.auth import require_owner, require_staff_or_owner
+from app.api.dependencies.auth import get_current_user, require_owner, require_staff_or_owner
 from app.db import get_db
+from app.models.user import User
 from app.schemas.menu_item import MenuCategory, MenuItemRead
 from app.services.menu_service import MenuService
 
@@ -13,9 +14,12 @@ router = APIRouter()
 
 
 @router.get("/", response_model=list[MenuItemRead])
-def list_menus(db: Session = Depends(get_db)):
+def list_menus(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     service = MenuService(db)
-    return service.list_menu_items()
+    return service.list_menu_items(current_user.restaurant_id)
 
 
 @router.get("/categories", response_model=list[MenuCategory])
@@ -40,16 +44,17 @@ def create_menu_item(
     name: str = Form(...),
     price: Decimal = Form(...),
     category: MenuCategory = Form(...),
+    description: str | None = Form(None),
     is_available: bool = Form(True),
     image: UploadFile | None = File(None),
     db: Session = Depends(get_db),
-    _current_user=Depends(require_owner),
+    current_user: User = Depends(require_owner),
 ):
     service = MenuService(db)
     image_url = None
     if image is not None:
         try:
-            image_url = service.upload_menu_image(image)
+            image_url = service.upload_menu_image(image, current_user.restaurant_id)
         except ValueError as exc:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
@@ -57,6 +62,8 @@ def create_menu_item(
     return service.create_menu_item(
         name=name,
         price=price,
+        restaurant_id=current_user.restaurant_id,
+        description=description,
         is_available=is_available,
         category=category,
         image_url=image_url,
@@ -70,10 +77,11 @@ def update_menu_item(
     name: str | None = Form(None),
     price: Decimal | None = Form(None),
     category: MenuCategory | None = Form(None),
+    description: str | None = Form(None),
     is_available: bool | None = Form(None),
     image: UploadFile | None = File(None),
     db: Session = Depends(get_db),
-    _current_user=Depends(require_staff_or_owner),
+    current_user: User = Depends(require_staff_or_owner),
 ):
     service = MenuService(db)
     changes = {}
@@ -83,11 +91,13 @@ def update_menu_item(
         changes["price"] = price
     if category is not None:
         changes["category"] = category
+    if description is not None:
+        changes["description"] = description
     if is_available is not None:
         changes["is_available"] = is_available
     if image is not None:
         try:
-            changes["image_url"] = service.upload_menu_image(image)
+            changes["image_url"] = service.upload_menu_image(image, current_user.restaurant_id)
         except ValueError as exc:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc

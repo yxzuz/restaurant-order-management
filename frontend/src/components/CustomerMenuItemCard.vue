@@ -1,9 +1,9 @@
 <template>
   <div
-    class="overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition hover:shadow-lg"
+    class="overflow-hidden rounded-xl border border-border bg-card shadow-sm transition hover:shadow-lg"
     :class="{ 'opacity-60': !item.is_available }"
   >
-    <div class="aspect-video overflow-hidden bg-muted">
+    <div class="aspect-[3/2] overflow-hidden bg-muted">
       <img
         :src="item.image_url || fallbackImage"
         :alt="item.name"
@@ -11,10 +11,10 @@
       >
     </div>
 
-    <div class="space-y-4 p-4">
+    <div class="space-y-2.5 p-3">
       <div>
-        <div class="flex items-center gap-2 flex-wrap">
-          <h3 class="font-heading text-lg font-semibold text-foreground">
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <h3 class="font-heading text-base font-semibold text-foreground">
             {{ item.name }}
           </h3>
           <span :class="categoryBadgeClass">
@@ -22,38 +22,38 @@
           </span>
           <span
             v-if="!item.is_available"
-            class="rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive"
+            class="rounded-full bg-destructive/10 px-1.5 py-0.5 text-xs font-medium text-destructive"
           >
             Unavailable
           </span>
         </div>
 
-        <p class="mt-2 text-sm text-muted-foreground leading-relaxed">
+        <p v-if="item.description" class="mt-1.5 text-xs text-muted-foreground leading-snug line-clamp-2">
           {{ item.description }}
         </p>
       </div>
 
-      <div class="flex items-center justify-between border-t border-border pt-3">
+      <div class="flex items-center justify-between border-t border-border pt-2.5">
         <div>
-          <p class="text-lg font-semibold text-foreground">฿{{ item.price }}</p>
+          <p class="text-base font-semibold text-foreground">{{ formatCurrency(item.price) }}</p>
         </div>
 
         <div
           v-if="item.is_available"
-          class="flex items-center gap-2"
+          class="flex items-center gap-1.5"
         >
           <button
             v-if="quantity > 0"
             type="button"
             @click="$emit('remove', item)"
-            class="flex h-9 w-9 items-center justify-center rounded-full border border-border text-foreground transition hover:bg-accent"
+            class="flex h-8 w-8 items-center justify-center rounded-full border border-border text-foreground transition hover:bg-accent"
           >
-            <Minus class="h-4 w-4" />
+            <Minus class="h-3.5 w-3.5" />
           </button>
 
           <span
             v-if="quantity > 0"
-            class="min-w-6 text-center text-sm font-semibold text-foreground"
+            class="min-w-5 text-center text-sm font-semibold text-foreground"
           >
             {{ quantity }}
           </span>
@@ -61,9 +61,9 @@
           <button
             type="button"
             @click="$emit('add', item)"
-            class="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground transition hover:bg-primary/90"
+            class="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground transition hover:bg-primary/90"
           >
-            <Plus class="h-4 w-4" />
+            <Plus class="h-3.5 w-3.5" />
           </button>
         </div>
       </div>
@@ -89,6 +89,13 @@ const props = defineProps({
 })
 
 defineEmits(['add', 'remove'])
+
+const formatCurrency = (value) => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'THB',
+  }).format(value)
+}
 
 const categoryBadgeClass = computed(() => {
   const category = props.item.category?.toLowerCase() || ''

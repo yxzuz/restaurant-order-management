@@ -114,7 +114,7 @@
           >
             No dishes found for this category.
           </div>
-          <div v-else class="grid gap-3 sm:grid-cols-2">
+          <div v-else class="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
             <CustomerMenuItemCard
               v-for="item in filteredMenuItems"
               :key="item.id"
@@ -439,7 +439,7 @@ async function loadPageData() {
 
   try {
     const [menu, order] = await Promise.all([
-      fetchCustomerMenuItems(),
+      fetchCustomerMenuItems(tableNumber.value, qrToken.value),
       fetchActiveOrderForTable(tableNumber.value, qrToken.value),
     ])
 
@@ -563,7 +563,7 @@ async function submitOrder() {
 }
 
 function formatCurrency(value) {
-  return new Intl.NumberFormat('th-TH', {
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'THB',
   }).format(Number(value) || 0)
@@ -582,10 +582,12 @@ function formatDate(value) {
   }
 
   return new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Bangkok',
     month: 'short',
     day: 'numeric',
     hour: 'numeric',
     minute: '2-digit',
+    hour12: true,
   }).format(new Date(value))
 }
 

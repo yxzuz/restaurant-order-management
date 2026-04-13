@@ -1,8 +1,14 @@
 import api from '@/services/api'
 import { normalizeMenuItem, normalizeOrder } from '@/services/owner'
 
-export async function fetchCustomerMenuItems() {
-  const menuItems = await api.get('/menus/')
+export async function fetchCustomerMenuItems(tableNumber, qrToken) {
+  if (!tableNumber || !qrToken) {
+    throw new Error('Table number and QR token are required to view the menu.')
+  }
+
+  const menuItems = await api.get(`/tables/${tableNumber}/menu`, {
+    params: { qr_token: qrToken },
+  })
   return Array.isArray(menuItems) ? menuItems.map(normalizeMenuItem) : []
 }
 

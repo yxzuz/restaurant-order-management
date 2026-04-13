@@ -52,7 +52,7 @@
 
       <div class="flex items-center justify-between border-t border-border pt-3">
         <div>
-          <p class="mt-1 text-lg font-semibold text-foreground">฿{{ item.price }}</p>
+          <p class="mt-1 text-lg font-semibold text-foreground">{{ formatCurrency(item.price) }}</p>
         </div>
 
         <div class="flex items-center gap-2">
@@ -96,6 +96,13 @@ const props = defineProps({
 })
 
 defineEmits(['edit', 'delete', 'toggle-availability'])
+
+const formatCurrency = (value) => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'THB',
+  }).format(value)
+}
 
 const canEdit = computed(() => props.userRole === 'owner')
 const canDelete = computed(() => props.userRole === 'owner')
