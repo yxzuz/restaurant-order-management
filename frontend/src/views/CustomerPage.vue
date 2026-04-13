@@ -635,7 +635,7 @@ async function cancelItem(item) {
   pageError.value = ''
 
   try {
-    const updatedOrder = await cancelCustomerOrderItem(activeOrder.value.id, item.id)
+    const updatedOrder = await cancelCustomerOrderItem(activeOrder.value.id, item.id, qrToken.value)
     activeOrder.value = updatedOrder
     
     // Close drawer if no items left

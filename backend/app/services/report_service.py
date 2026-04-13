@@ -9,8 +9,9 @@ from app.core.timezone import now_thai
 
 
 class ReportService:
-    def __init__(self, db: Session):
+    def __init__(self, db: Session, restaurant_id: int):
         self.db = db
+        self.restaurant_id = restaurant_id
 
     def get_daily_sales_summary(self, days: int = 7):
         """Get daily sales summary for the past N days"""
@@ -21,10 +22,12 @@ class ReportService:
         daily_sales = (
             self.db.query(
                 func.date(Order.created_at).label('date'),
-                func.sum(Order.total_amount).label('revenue'),
-                func.count(Order.id).label('order_count')
+                func.sum(OrderItem.quantity * OrderItem.unit_price).label('revenue'),
+                func.count(func.distinct(Order.id)).label('order_count')
             )
+            .join(OrderItem, OrderItem.order_id == Order.id)
             .filter(Order.payment_status == PaymentStatus.PAID)
+            .filter(Order.restaurant_id == self.restaurant_id)
             .filter(Order.created_at >= start_date)
             .group_by(func.date(Order.created_at))
             .order_by(func.date(Order.created_at).desc())
@@ -44,18 +47,25 @@ class ReportService:
         """Get overall statistics"""
         # Total revenue from paid orders
         total_revenue = (
-            self.db.query(func.sum(Order.total_amount))
+            self.db.query(func.sum(OrderItem.quantity * OrderItem.unit_price))
+            .join(Order, OrderItem.order_id == Order.id)
             .filter(Order.payment_status == PaymentStatus.PAID)
+            .filter(Order.restaurant_id == self.restaurant_id)
             .scalar() or 0
         )
 
         # Total orders
-        total_orders = self.db.query(func.count(Order.id)).scalar() or 0
+        total_orders = (
+            self.db.query(func.count(Order.id))
+            .filter(Order.restaurant_id == self.restaurant_id)
+            .scalar() or 0
+        )
 
         # Paid orders count
         paid_orders = (
             self.db.query(func.count(Order.id))
             .filter(Order.payment_status == PaymentStatus.PAID)
+            .filter(Order.restaurant_id == self.restaurant_id)
             .scalar() or 0
         )
 
@@ -64,6 +74,7 @@ class ReportService:
             self.db.query(func.count(Order.id))
             .filter(Order.payment_status == PaymentStatus.UNPAID)
             .filter(Order.status != OrderStatus.CANCELLED)
+            .filter(Order.restaurant_id == self.restaurant_id)
             .scalar() or 0
         )
 
@@ -86,6 +97,7 @@ class ReportService:
                 Order.status,
                 func.count(Order.id).label('count')
             )
+            .filter(Order.restaurant_id == self.restaurant_id)
             .group_by(Order.status)
             .all()
         )
@@ -107,12 +119,14 @@ class ReportService:
                 MenuItem.price,
                 MenuItem.category,
                 func.sum(OrderItem.quantity).label('total_quantity'),
-                func.sum(OrderItem.subtotal).label('total_revenue'),
-                func.count(OrderItem.id).label('order_count')
+                func.sum(OrderItem.quantity * OrderItem.unit_price).label('total_revenue'),
+                func.count(func.distinct(Order.id)).label('order_count')
             )
             .join(OrderItem, MenuItem.id == OrderItem.menu_item_id)
             .join(Order, OrderItem.order_id == Order.id)
             .filter(Order.payment_status == PaymentStatus.PAID)
+            .filter(Order.restaurant_id == self.restaurant_id)
+            .filter(MenuItem.restaurant_id == self.restaurant_id)
             .group_by(MenuItem.id, MenuItem.name, MenuItem.price, MenuItem.category)
             .order_by(desc(func.sum(OrderItem.quantity)))
             .limit(limit)
@@ -137,14 +151,16 @@ class ReportService:
         category_revenue = (
             self.db.query(
                 MenuItem.category,
-                func.sum(OrderItem.subtotal).label('revenue'),
+                func.sum(OrderItem.quantity * OrderItem.unit_price).label('revenue'),
                 func.sum(OrderItem.quantity).label('quantity')
             )
             .join(OrderItem, MenuItem.id == OrderItem.menu_item_id)
             .join(Order, OrderItem.order_id == Order.id)
             .filter(Order.payment_status == PaymentStatus.PAID)
+            .filter(Order.restaurant_id == self.restaurant_id)
+            .filter(MenuItem.restaurant_id == self.restaurant_id)
             .group_by(MenuItem.category)
-            .order_by(desc(func.sum(OrderItem.subtotal)))
+            .order_by(desc(func.sum(OrderItem.quantity * OrderItem.unit_price)))
             .all()
         )
 
@@ -162,10 +178,12 @@ class ReportService:
         hourly_orders = (
             self.db.query(
                 func.extract('hour', Order.created_at).label('hour'),
-                func.count(Order.id).label('order_count'),
-                func.sum(Order.total_amount).label('revenue')
+                func.count(func.distinct(Order.id)).label('order_count'),
+                func.sum(OrderItem.quantity * OrderItem.unit_price).label('revenue')
             )
+            .join(OrderItem, OrderItem.order_id == Order.id)
             .filter(Order.payment_status == PaymentStatus.PAID)
+            .filter(Order.restaurant_id == self.restaurant_id)
             .group_by(func.extract('hour', Order.created_at))
             .order_by(func.extract('hour', Order.created_at))
             .all()

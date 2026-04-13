@@ -113,7 +113,7 @@ def delete_staff(
 ):
     service = AuthService(db)
     try:
-        deleted = service.delete_staff(user_id)
+        deleted = service.delete_staff(user_id, current_user.restaurant_id)
     except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc

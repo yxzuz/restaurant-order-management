@@ -6,7 +6,7 @@ from app.db import get_db
 from app.services.report_service import ReportService
 from app.models.user import User
 
-router = APIRouter(prefix="/reports", tags=["reports"])
+router = APIRouter()
 
 
 @router.get("/daily-sales")
@@ -16,7 +16,7 @@ def get_daily_sales(
     current_user: User = Depends(require_owner)
 ):
     """Get daily sales summary for the past N days (owner only)"""
-    report_service = ReportService(db)
+    report_service = ReportService(db, restaurant_id=current_user.restaurant_id)
     return {
         "daily_sales": report_service.get_daily_sales_summary(days),
         "overall_stats": report_service.get_overall_stats(),
@@ -31,7 +31,7 @@ def get_top_items(
     current_user: User = Depends(require_owner)
 ):
     """Get top selling menu items (owner only)"""
-    report_service = ReportService(db)
+    report_service = ReportService(db, restaurant_id=current_user.restaurant_id)
     return {
         "top_items": report_service.get_top_selling_items(limit),
         "revenue_by_category": report_service.get_revenue_by_category()
@@ -44,7 +44,7 @@ def get_analytics(
     current_user: User = Depends(require_owner)
 ):
     """Get comprehensive analytics dashboard data (owner only)"""
-    report_service = ReportService(db)
+    report_service = ReportService(db, restaurant_id=current_user.restaurant_id)
 
     return {
         "overall_stats": report_service.get_overall_stats(),

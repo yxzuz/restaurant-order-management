@@ -53,6 +53,10 @@ class OrderService:
             if menu_item is None:
                 raise ValueError(
                     f"Menu item {item_data['menu_item_id']} not found")
+            if menu_item.restaurant_id != table.restaurant_id:
+                raise PermissionError(
+                    f"Menu item {item_data['menu_item_id']} does not belong to this restaurant"
+                )
             if not menu_item.is_available:
                 raise ValueError(
                     f"Menu item {item_data['menu_item_id']} is unavailable")

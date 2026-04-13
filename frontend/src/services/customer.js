@@ -37,7 +37,13 @@ export async function createCustomerOrder({ tableNumber, qrToken, items }) {
   return normalizeOrder(order)
 }
 
-export async function cancelCustomerOrderItem(orderId, itemId) {
-  const order = await api.delete(`/orders/${orderId}/items/${itemId}`)
+export async function cancelCustomerOrderItem(orderId, itemId, qrToken) {
+  if (!qrToken) {
+    throw new Error('QR token is required to cancel items for this table.')
+  }
+
+  const order = await api.delete(`/orders/${orderId}/items/${itemId}`, {
+    params: { qr_token: qrToken },
+  })
   return normalizeOrder(order)
 }

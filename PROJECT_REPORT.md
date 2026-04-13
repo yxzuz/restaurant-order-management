@@ -281,6 +281,35 @@ The system implements a **classic layered architecture** with four distinct laye
 
 ### 3.2 Architecture Benefits
 
+#### Requirement-Driven Architecture Characteristics
+
+The system’s architecture was selected and evolved based on concrete requirements (multi-role access, QR ordering, payment rules, analytics), and is best explained through the following architecture characteristics in priority order.
+
+1. **Security (highest priority)**
+    - **Requirement:** Protect staff credentials, payment records, and enforce strict tenant isolation between restaurants.
+    - **How it is implemented:** JWT authentication (`Authorization: Bearer <token>`), bcrypt password hashing, role-based backend dependencies (`require_owner`, `require_staff_or_owner`), QR token validation for customer access, and **`restaurant_id` scoping** for data access so one restaurant cannot read or modify another restaurant’s data.
+    - **Why it matters:** Without tenant isolation, an owner could view another restaurant’s revenue or orders.
+
+2. **Modularity**
+    - **Requirement:** Support ongoing feature growth (multi-tenant restaurants, analytics, QR customer flow) without rewriting unrelated code.
+    - **How it is implemented:** Layering (Routes → Services → Repositories → Models) and domain-focused modules (`auth_service`, `order_service`, `menu_service`, `table_service`). This keeps HTTP concerns out of business rules and database queries.
+
+3. **Maintainability**
+    - **Requirement:** Keep the system understandable and change-friendly for an academic project under time constraints.
+    - **How it is implemented:** Pydantic schemas validate at boundaries, consistent naming conventions for dependencies and routes, and small focused services. Changes (e.g., adding multi-tenancy or new menu fields like descriptions) have clear “homes” in the codebase.
+
+4. **Testability**
+    - **Requirement:** Validate business rules and security boundaries without manual testing.
+    - **How it is implemented:** Business logic is centralized in services and repositories accept injected DB sessions, allowing tests to exercise rules like “payment requires all items completed” and “restaurant B cannot read restaurant A’s menu items” using FastAPI’s `TestClient`.
+
+5. **Reliability**
+    - **Requirement:** Prevent invalid state transitions and ensure consistent workflow behavior.
+    - **How it is implemented:** Strict order and item status transition rules, payment gating (cannot mark PAID until all items are COMPLETED), and table state updates (table becomes AVAILABLE when an order is paid). These rules are enforced in the service layer.
+
+6. **Scalability (moderate priority)**
+    - **Requirement:** Support growth from a single restaurant to multiple restaurants with minimal redesign.
+    - **How it is implemented:** Multi-tenant data model (`restaurant_id` foreign keys) supports many restaurants in one deployment; swapping SQLite→PostgreSQL is configuration-driven; and image storage is externalized to AWS S3.
+
 #### Low Coupling
 
 - **Interface-based communication:** Layers interact through well-defined interfaces

@@ -28,10 +28,14 @@ def list_menu_categories():
 
 
 @router.get("/{item_id}", response_model=MenuItemRead)
-def get_menu_item(item_id: int, db: Session = Depends(get_db)):
+def get_menu_item(
+    item_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     service = MenuService(db)
     menu_item = service.get_menu_item(item_id)
-    if menu_item is None:
+    if menu_item is None or menu_item.restaurant_id != current_user.restaurant_id:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Menu item not found")
     return menu_item
@@ -85,6 +89,14 @@ def update_menu_item(
     current_user: User = Depends(require_staff_or_owner),
 ):
     service = MenuService(db)
+
+    menu_item = service.get_menu_item(item_id)
+    if menu_item is None or menu_item.restaurant_id != current_user.restaurant_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Menu item not found",
+        )
+
     changes = {}
     if name is not None:
         changes["name"] = name
@@ -116,8 +128,18 @@ def update_menu_item(
 
 
 @router.delete("/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_menu_item(item_id: int, db: Session = Depends(get_db), _current_user=Depends(require_owner)):
+def delete_menu_item(
+    item_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_owner),
+):
     service = MenuService(db)
+    menu_item = service.get_menu_item(item_id)
+    if menu_item is None or menu_item.restaurant_id != current_user.restaurant_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Menu item not found",
+        )
     try:
         service.delete_menu_item(item_id)
     except ValueError as exc:

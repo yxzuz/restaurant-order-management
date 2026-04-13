@@ -81,12 +81,14 @@ class AuthService:
             role=UserRole.STAFF,
         )
 
-    def delete_staff(self, user_id: int) -> bool:
+    def delete_staff(self, user_id: int, restaurant_id: int) -> bool:
         user = self.user_repository.get_by_id(user_id)
         if user is None:
             return False
         if user.role != UserRole.STAFF:
             raise ValueError("Only staff accounts can be deleted")
+        if user.restaurant_id != restaurant_id:
+            return False
 
         self.user_repository.delete(user)
         return True
