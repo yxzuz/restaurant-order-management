@@ -69,7 +69,8 @@ def test_create_order_invalid_qr_token_forbidden(client: TestClient):
         password="pass1234",
         restaurant_name="Bad QR",
     )
-    menu_item = _create_menu_item(client, owner_token, name="Dish", price="10.00")
+    menu_item = _create_menu_item(
+        client, owner_token, name="Dish", price="10.00")
 
     resp = client.post(
         "/api/orders/",
@@ -96,7 +97,8 @@ def test_create_order_rejects_cross_restaurant_menu_item(client: TestClient):
         restaurant_name="Order B",
     )
 
-    item_b = _create_menu_item(client, token_b, name="Other Dish", price="10.00")
+    item_b = _create_menu_item(
+        client, token_b, name="Other Dish", price="10.00")
     table_a = _create_table(client, token_a, 1)
 
     resp = client.post(
@@ -185,12 +187,14 @@ def test_reports_require_owner_and_are_tenant_scoped(client: TestClient):
     assert paid_a["payment_status"].lower() == "paid"
     assert paid_b["payment_status"].lower() == "paid"
 
-    analytics_a = client.get("/api/reports/analytics", headers=auth_headers(token_a))
+    analytics_a = client.get("/api/reports/analytics",
+                             headers=auth_headers(token_a))
     assert analytics_a.status_code == 200, analytics_a.text
     total_revenue_a = analytics_a.json()["overall_stats"]["total_revenue"]
     assert total_revenue_a == 100.0
 
-    analytics_b = client.get("/api/reports/analytics", headers=auth_headers(token_b))
+    analytics_b = client.get("/api/reports/analytics",
+                             headers=auth_headers(token_b))
     assert analytics_b.status_code == 200, analytics_b.text
     total_revenue_b = analytics_b.json()["overall_stats"]["total_revenue"]
     assert total_revenue_b == 200.0
@@ -204,8 +208,10 @@ def test_staff_forbidden_from_reports(client: TestClient):
         restaurant_name="Rep Staff",
     )
 
-    create_staff(client, owner_token=owner_token, username="staff_rep", password="pass1234")
+    create_staff(client, owner_token=owner_token,
+                 username="staff_rep", password="pass1234")
     staff_token = login(client, username="staff_rep", password="pass1234")
 
-    resp = client.get("/api/reports/daily-sales", headers=auth_headers(staff_token))
+    resp = client.get("/api/reports/daily-sales",
+                      headers=auth_headers(staff_token))
     assert resp.status_code == 403

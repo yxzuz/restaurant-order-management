@@ -22,7 +22,8 @@ class ReportService:
         daily_sales = (
             self.db.query(
                 func.date(Order.created_at).label('date'),
-                func.sum(OrderItem.quantity * OrderItem.unit_price).label('revenue'),
+                func.sum(OrderItem.quantity *
+                         OrderItem.unit_price).label('revenue'),
                 func.count(func.distinct(Order.id)).label('order_count')
             )
             .join(OrderItem, OrderItem.order_id == Order.id)
@@ -119,7 +120,8 @@ class ReportService:
                 MenuItem.price,
                 MenuItem.category,
                 func.sum(OrderItem.quantity).label('total_quantity'),
-                func.sum(OrderItem.quantity * OrderItem.unit_price).label('total_revenue'),
+                func.sum(OrderItem.quantity *
+                         OrderItem.unit_price).label('total_revenue'),
                 func.count(func.distinct(Order.id)).label('order_count')
             )
             .join(OrderItem, MenuItem.id == OrderItem.menu_item_id)
@@ -151,7 +153,8 @@ class ReportService:
         category_revenue = (
             self.db.query(
                 MenuItem.category,
-                func.sum(OrderItem.quantity * OrderItem.unit_price).label('revenue'),
+                func.sum(OrderItem.quantity *
+                         OrderItem.unit_price).label('revenue'),
                 func.sum(OrderItem.quantity).label('quantity')
             )
             .join(OrderItem, MenuItem.id == OrderItem.menu_item_id)
@@ -179,7 +182,8 @@ class ReportService:
             self.db.query(
                 func.extract('hour', Order.created_at).label('hour'),
                 func.count(func.distinct(Order.id)).label('order_count'),
-                func.sum(OrderItem.quantity * OrderItem.unit_price).label('revenue')
+                func.sum(OrderItem.quantity *
+                         OrderItem.unit_price).label('revenue')
             )
             .join(OrderItem, OrderItem.order_id == Order.id)
             .filter(Order.payment_status == PaymentStatus.PAID)

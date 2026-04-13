@@ -19,7 +19,8 @@ os.environ.setdefault("AWS_S3_BUCKET", "test-bucket")
 os.environ.setdefault("AWS_ACCESS_KEY_ID", "test-access-key")
 os.environ.setdefault("AWS_SECRET_ACCESS_KEY", "test-secret-access-key")
 
-_TEST_DB_FILE = Path(tempfile.gettempdir()) / f"restaurant_order_mgmt_test_{uuid.uuid4().hex}.sqlite"
+_TEST_DB_FILE = Path(tempfile.gettempdir()) / \
+    f"restaurant_order_mgmt_test_{uuid.uuid4().hex}.sqlite"
 os.environ.setdefault("DATABASE_URL", f"sqlite+pysqlite:///{_TEST_DB_FILE}")
 
 from app.main import app  # noqa: E402

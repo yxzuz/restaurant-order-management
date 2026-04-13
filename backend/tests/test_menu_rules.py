@@ -94,7 +94,8 @@ def test_staff_can_update_menu_but_cannot_delete(client: TestClient):
     assert created.status_code == 201
     item_id = created.json()["id"]
 
-    create_staff(client, owner_token=owner_token, username="staff_menu", password="pass1234")
+    create_staff(client, owner_token=owner_token,
+                 username="staff_menu", password="pass1234")
     staff_token = login(client, username="staff_menu", password="pass1234")
 
     update = client.patch(

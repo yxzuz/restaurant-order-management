@@ -37,7 +37,8 @@ def test_staff_can_list_tables(client: TestClient):
         json={"number": 1},
     )
 
-    create_staff(client, owner_token=owner_token, username="staff_tables", password="pass1234")
+    create_staff(client, owner_token=owner_token,
+                 username="staff_tables", password="pass1234")
     staff_token = login(client, username="staff_tables", password="pass1234")
 
     resp = client.get("/api/tables/", headers=auth_headers(staff_token))
@@ -53,10 +54,12 @@ def test_table_access_links_owner_only(client: TestClient):
         restaurant_name="Links",
     )
 
-    create_staff(client, owner_token=owner_token, username="staff_links", password="pass1234")
+    create_staff(client, owner_token=owner_token,
+                 username="staff_links", password="pass1234")
     staff_token = login(client, username="staff_links", password="pass1234")
 
-    resp = client.get("/api/tables/access-links", headers=auth_headers(staff_token))
+    resp = client.get("/api/tables/access-links",
+                      headers=auth_headers(staff_token))
     assert resp.status_code == 403
 
 

@@ -50,7 +50,8 @@ def test_staff_cannot_create_menu_item(client: TestClient):
         restaurant_name="Role Restaurant",
     )
 
-    create_staff(client, owner_token=owner_token, username="staff_role", password="pass1234")
+    create_staff(client, owner_token=owner_token,
+                 username="staff_role", password="pass1234")
     staff_token = login(client, username="staff_role", password="pass1234")
 
     resp = client.post(

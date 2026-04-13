@@ -19,6 +19,7 @@ def _get_optional_user(
     service = AuthService(db)
     return service.get_current_user(token)
 
+
 router = APIRouter()
 
 

@@ -126,7 +126,8 @@ def test_delete_staff_is_tenant_scoped(client: TestClient):
         password="pass1234",
     )
     staff_token_b = login(client, username="staff_del_b", password="pass1234")
-    staff_me_b = client.get("/api/auth/me", headers=auth_headers(staff_token_b))
+    staff_me_b = client.get(
+        "/api/auth/me", headers=auth_headers(staff_token_b))
     staff_id_b = staff_me_b.json()["id"]
 
     # Owner A should not be able to delete staff from restaurant B
