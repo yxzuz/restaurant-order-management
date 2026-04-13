@@ -131,11 +131,11 @@
 
     <!-- Floating Cart Bar -->
     <div v-if="cartItemCount > 0 && !requiresQrAccess" class="fixed bottom-0 left-0 right-0 bg-card border-t p-4 z-20">
-      <Button class="w-full" size="lg" @click="cartDrawerOpen = true">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+      <Button class="w-full truncate" size="lg" @click="cartDrawerOpen = true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 shrink-0">
           <circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
         </svg>
-        View Cart ({{ cartItemCount }}) — {{ formatCurrency(cartTotal) }}
+        <span class="truncate">View Cart ({{ cartItemCount }}) — {{ formatCurrency(cartTotal) }}</span>
       </Button>
     </div>
 
@@ -209,9 +209,9 @@
               </div>
 
               <div class="border-t pt-4">
-                <div class="flex justify-between items-center mb-2">
-                  <span class="font-semibold text-lg">Total Amount</span>
-                  <span class="text-2xl font-bold text-primary">{{ formatCurrency(activeOrder.total_amount) }}</span>
+                <div class="flex justify-between items-center mb-2 gap-3">
+                  <span class="font-semibold text-sm sm:text-base lg:text-lg shrink-0">Total Amount</span>
+                  <span class="text-lg sm:text-xl lg:text-2xl font-bold text-primary break-words text-right min-w-0">{{ formatCurrency(activeOrder.total_amount) }}</span>
                 </div>
                 <div class="rounded-lg bg-blue-50 border border-blue-200 px-3 py-2.5 mt-3">
                   <p class="text-xs text-blue-900">
@@ -279,9 +279,9 @@
           </div>
 
           <div v-if="cart.length > 0" class="border-t p-6">
-            <div class="flex justify-between font-semibold mb-4">
-              <span>Total</span>
-              <span>{{ formatCurrency(cartTotal) }}</span>
+            <div class="flex justify-between items-center font-semibold mb-4 gap-3">
+              <span class="shrink-0">Total</span>
+              <span class="text-right min-w-0 break-words">{{ formatCurrency(cartTotal) }}</span>
             </div>
 
             <p

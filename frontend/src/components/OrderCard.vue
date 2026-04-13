@@ -29,9 +29,9 @@
           </div>
         </div>
 
-        <div class="text-left sm:text-right">
+        <div class="text-left sm:text-right min-w-0 shrink-0">
           <p class="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">Total</p>
-          <p class="mt-1 text-2xl font-semibold text-orange-600">{{ formatCurrency(order.total_amount) }}</p>
+          <p class="mt-1 text-lg sm:text-xl lg:text-2xl font-semibold text-orange-600 break-words">{{ formatCurrency(order.total_amount) }}</p>
         </div>
       </div>
 
