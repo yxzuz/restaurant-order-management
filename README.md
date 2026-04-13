@@ -388,7 +388,7 @@ restaurant-order-management/
 │   │
 │   ├── env/                          # Virtual environment
 │   ├── requirements.txt
-│   └── restaurant.db                 # SQLite database
+│   └── .env                          # Environment variables (DB connection)
 │
 ├── frontend/
 │   ├── src/
@@ -446,6 +446,7 @@ restaurant-order-management/
 
 - **Python 3.11+**
 - **Node.js 18+** and npm
+- **PostgreSQL 15+**
 - **AWS Account** (for S3 image uploads)
 
 ### Environment Setup
@@ -477,7 +478,7 @@ Create a `.env` file in the `backend/` directory:
 
 ```env
 # Database
-DATABASE_URL=sqlite:///./restaurant.db
+DATABASE_URL=postgresql://postgres@localhost/restaurant_db
 
 # JWT Authentication
 SECRET_KEY=your-secret-key-here-change-in-production
@@ -489,6 +490,12 @@ AWS_ACCESS_KEY_ID=your-aws-access-key
 AWS_SECRET_ACCESS_KEY=your-aws-secret-key
 AWS_REGION=ap-southeast-1
 S3_BUCKET_NAME=your-bucket-name
+```
+
+**Create PostgreSQL database (first time only):**
+
+```bash
+createdb restaurant_db
 ```
 
 **Run database migrations (automatic on startup):**
@@ -885,10 +892,10 @@ lsof -i :8000
 **Database issues:**
 
 ```bash
-# Delete database and restart fresh
+# Reset PostgreSQL schema and restart fresh
+/opt/homebrew/opt/postgresql@15/bin/psql -d restaurant_db -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
 cd backend
-rm restaurant.db
-python -m app.main  # Will recreate tables
+python -m uvicorn app.main:app --reload --port 8000
 ```
 
 **Dependency issues:**
@@ -927,7 +934,66 @@ npm install
 
 ---
 
-## 📝 License
+## � Screenshots
+
+### Landing Page & Authentication
+
+![Home Page](docs/screenshots/home.png)
+_Landing page with role-based access options_
+
+![Login Modal](docs/screenshots/login.png)
+_Owner/Staff login with validation_
+
+### Customer Experience (QR Code Ordering)
+
+![Customer Menu](docs/screenshots/customer-menu.png)
+_Customer menu view after scanning QR code_
+
+![Shopping Cart](docs/screenshots/customer-cart.png)
+_Cart with selected items and total_
+
+![Active Order](docs/screenshots/customer-order.png)
+_Real-time order tracking with per-item status_
+
+### Owner Dashboard
+
+![Owner Dashboard](docs/screenshots/owner-dashboard.png)
+_Dashboard overview with key statistics_
+
+![Analytics](docs/screenshots/analytics.png)
+_Comprehensive analytics with charts and insights_
+
+### Menu Management
+
+![Menu List](docs/screenshots/menu-list.png)
+_Menu management with image upload and CRUD operations_
+
+![Edit Menu Item](docs/screenshots/menu-edit.png)
+_Edit menu item modal with AWS S3 image upload_
+
+### Order Management
+
+![Order List](docs/screenshots/order-list.png)
+_Order management dashboard for staff and owner_
+
+![Order Details](docs/screenshots/order-details.png)
+_Detailed order view with per-item status controls_
+
+### Staff Management (Owner Only)
+
+![Staff Management](docs/screenshots/staff-management.png)
+_Create and manage staff accounts_
+
+### Table Management (Owner Only)
+
+![Tables & QR Codes](docs/screenshots/tables.png)
+_Table management with unique QR codes for each table_
+
+> **Note:** Screenshots will be added before final submission. System is fully functional and ready for demonstration.
+
+---
+
+## �📝 License
 
 This project is developed for educational purposes as part of a Software Architecture course.
 
