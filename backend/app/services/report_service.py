@@ -31,10 +31,14 @@ class ReportService:
 
     def get_overall_stats(self):
         """Get overall statistics"""
-        total_revenue = self.report_repository.get_total_revenue(self.restaurant_id) or 0
-        total_orders = self.report_repository.count_orders(self.restaurant_id) or 0
-        paid_orders = self.report_repository.count_paid_orders(self.restaurant_id) or 0
-        pending_orders = self.report_repository.count_pending_orders(self.restaurant_id) or 0
+        total_revenue = self.report_repository.get_total_revenue(
+            self.restaurant_id) or 0
+        total_orders = self.report_repository.count_orders(
+            self.restaurant_id) or 0
+        paid_orders = self.report_repository.count_paid_orders(
+            self.restaurant_id) or 0
+        pending_orders = self.report_repository.count_pending_orders(
+            self.restaurant_id) or 0
 
         # Average order value (from paid orders)
         avg_order_value = float(total_revenue) / \
@@ -50,7 +54,8 @@ class ReportService:
 
     def get_orders_by_status(self):
         """Get order counts grouped by status"""
-        status_counts = self.report_repository.get_orders_by_status(self.restaurant_id)
+        status_counts = self.report_repository.get_orders_by_status(
+            self.restaurant_id)
 
         return [
             {
