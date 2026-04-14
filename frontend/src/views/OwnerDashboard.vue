@@ -118,7 +118,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, h, onMounted, ref } from 'vue'
 import { DollarSign, ShoppingBag, Clock, TrendingUp } from 'lucide-vue-next'
 import QRCode from 'qrcode'
 
@@ -144,11 +144,26 @@ const formatCurrency = (value) => {
   }).format(value)
 }
 
+const formatBahtCompact = (value) => {
+  const numeric = Number(value) || 0
+  const compact = new Intl.NumberFormat('en-US', {
+    notation: 'compact',
+    maximumFractionDigits: 1,
+  }).format(numeric)
+  return `${compact}`
+}
+
+const BahtIcon = {
+  render() {
+    return h('span', { class: 'text-lg font-bold leading-none' }, '฿')
+  },
+}
+
 const stats = computed(() => [
   {
     title: 'Total Revenue',
-    value: formatCurrency(orders.value.reduce((sum, order) => sum + Number(order.total_amount), 0)),
-    icon: DollarSign,
+    value: formatBahtCompact(orders.value.reduce((sum, order) => sum + Number(order.total_amount), 0)),
+    icon: BahtIcon,
     description: "Today's earnings",
   },
   {

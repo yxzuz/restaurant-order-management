@@ -150,16 +150,16 @@ function buildMenuItemFormData(payload) {
 // Analytics / Reporting
 export async function fetchDailySales(days = 7) {
   const response = await api.get(`/reports/daily-sales?days=${days}`, ownerAuthConfig())
-  return response.data
+  return response
 }
 
 export async function fetchTopItems(limit = 10) {
   const response = await api.get(`/reports/top-items?limit=${limit}`, ownerAuthConfig())
-  return response.data
+  return response
 }
 
 export async function fetchAnalytics() {
   const response = await api.get('/reports/analytics', ownerAuthConfig())
-  return response.data
+  return response
 }
 

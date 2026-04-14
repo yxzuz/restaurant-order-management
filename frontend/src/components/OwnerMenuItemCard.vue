@@ -13,15 +13,15 @@
 
     <div class="space-y-4 p-4">
       <div class="space-y-3">
-        <div class="flex items-start gap-3">
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-3">
           <div class="min-w-0 flex-1">
-            <h3 class="font-heading text-lg font-semibold leading-snug text-foreground">
+            <h3 class="break-words font-heading text-lg font-semibold leading-snug text-foreground">
               {{ item.name }}
             </h3>
           </div>
 
-          <div class="flex shrink-0 items-center gap-2">
-            <p class="rounded-full border border-border px-2 py-0.5 font-body text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+          <div class="flex w-full flex-wrap items-center justify-end gap-2 sm:w-auto sm:shrink-0">
+            <p class="shrink-0 rounded-full border border-border px-2 py-0.5 font-body text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
               {{ item.category }}
             </p>
             <button
