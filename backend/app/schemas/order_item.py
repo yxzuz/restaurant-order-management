@@ -26,7 +26,7 @@ class OrderItemStatusUpdate(BaseModel):
 class OrderItemRead(BaseModel):
     id: int
     order_id: int
-    menu_item_id: int
+    menu_item_id: int | None = None
     quantity: int
     unit_price: Decimal
     status: str = "NEW"

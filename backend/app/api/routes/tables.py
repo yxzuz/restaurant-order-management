@@ -86,11 +86,9 @@ def get_menu_for_table(
 ):
     """Public endpoint for customers to get menu via QR code"""
     from app.services.menu_service import MenuService
-    from app.repositories.table_repository import TableRepository
 
-    # Validate table access via QR token
-    table_repo = TableRepository(db)
-    table = table_repo.get_by_number_and_qr_token(table_number, qr_token)
+    table_service = TableService(db)
+    table = table_service.get_table_by_access(table_number, qr_token)
 
     if not table:
         raise HTTPException(

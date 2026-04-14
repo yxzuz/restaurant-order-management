@@ -22,7 +22,7 @@ class OrderItem(Base):
     order_id = Column(Integer, ForeignKey("orders.id"),
                       nullable=False, index=True)
     menu_item_id = Column(Integer, ForeignKey(
-        "menu_items.id"), nullable=False, index=True)
+        "menu_items.id", ondelete="SET NULL"), nullable=True, index=True)
     quantity = Column(Integer, nullable=False, default=1)
     unit_price = Column(Numeric(10, 2), nullable=False)
     status = Column(
