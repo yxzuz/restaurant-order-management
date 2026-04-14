@@ -120,6 +120,12 @@ The system must support three distinct user roles:
 - Access comprehensive analytics dashboard
 - All staff capabilities
 
+**Multi-tenant requirement (Restaurants):**
+
+- Each owner account is associated with exactly one restaurant.
+- Staff accounts are created under (and restricted to) the owner’s restaurant.
+- All restaurant data (menu items, tables, orders, reports) is scoped by `restaurant_id` to ensure tenant isolation.
+
 #### FR-2: Database Operations (CRUD) ✅
 
 Each user role must perform at least one CRUD operation:
@@ -145,7 +151,7 @@ Each user role must perform at least one CRUD operation:
 #### FR-3: Authentication & Authorization ✅
 
 - Secure login/logout functionality
-- JWT-based authentication with 30-minute expiration
+- JWT-based authentication with configurable expiration (default: 30 minutes)
 - Password hashing using bcrypt
 - Role-based route protection (frontend and backend)
 - Automatic token expiration handling
@@ -187,41 +193,81 @@ Each user role must perform at least one CRUD operation:
 
 ### 2.2 Non-Functional Requirements
 
-#### NFR-1: Security
+Non-functional requirements represent stakeholder needs and constraints that define **how** the system should perform, rather than **what** it should do. These requirements drive the selection of architecture characteristics and technical design decisions.
 
-- JWT tokens with Bearer authentication scheme
-- Bcrypt password hashing (cost factor 12)
-- CORS configuration for cross-origin requests
-- Role-based API endpoint protection
-- Input validation and sanitization
+#### NFR-1: Security & Data Isolation
+
+**Stakeholder requirement:**
+
+- The system must protect sensitive data (credentials, payment records, revenue analytics)
+- One restaurant's data must never be accessible to another restaurant
+- Staff members must not access owner-only features
+- Customer ordering must work without exposing personal data
+
+**Measurable criteria:**
+
+- All passwords must be encrypted at rest
+- Authentication tokens must expire within a reasonable timeframe
+- Cross-restaurant data access must be prevented at database level
+- Authorization checks must occur on every protected endpoint
 
 #### NFR-2: Usability
 
-- Responsive UI design (mobile and desktop)
-- User-friendly error messages
-- Real-time feedback (5-second auto-refresh)
-- Intuitive status badges with color coding
-- Clear navigation with role-based menus
+**Stakeholder requirement:**
+
+- Customers must be able to order without technical knowledge or account creation
+- Staff must process orders quickly during peak hours
+- System must provide clear visual feedback on order status
+- Interfaces must work on both desktop computers and mobile devices
+
+**Measurable criteria:**
+
+- QR code scan → menu view requires ≤ 2 clicks
+- Order status updates visible within 5 seconds of change
+- Mobile screens must render without horizontal scrolling
+- Error messages must be actionable (not technical jargon)
 
 #### NFR-3: Performance
 
-- Lightweight SQLite database for development
-- Efficient database queries with proper indexing
-- Image storage offloaded to AWS S3
-- Minimal page load times
+**Stakeholder requirement:**
 
-#### NFR-4: Maintainability
+- System must handle typical restaurant workload (20 tables, concurrent ordering)
+- Menu browsing and order status checks must feel instantaneous
+- Reports must load without noticeable delay for typical date ranges
 
-- Layered architecture with clear separation
-- Modular code organization
-- Consistent naming conventions
-- Comprehensive README documentation
+**Measurable criteria:**
+
+- Page load time acceptable for Wi-Fi conditions
+- Database queries complete within reasonable time for dataset size
+- Image loading does not block menu browsing
+
+#### NFR-4: Maintainability & Evolvability
+
+**Stakeholder requirement:**
+
+- Code must be understandable for academic assessment and future maintenance
+- Adding new features (reports, menu fields) should not require rewriting unrelated code
+- System structure must be evident from file organization
+
+**Measurable criteria:**
+
+- New developers can locate feature code within minutes
+- Adding a new endpoint touches ≤ 3 layers (route, service, repository)
+- Automated tests prevent regression when making changes
 
 #### NFR-5: Localization
 
-- Thai timezone support (Asia/Bangkok, UTC+7)
-- Thai Baht (฿) currency formatting
-- Locale-aware date/time displays
+**Stakeholder requirement:**
+
+- System must support Thai restaurant operations (timezone, currency)
+- Times must reflect Bangkok local time, not server time
+- Prices must display in Thai Baht
+
+**Measurable criteria:**
+
+- All timestamps use Asia/Bangkok timezone (UTC+7)
+- Currency formatted as THB
+- Date/time displays match Thai business expectations
 
 ### 2.3 User Stories
 
@@ -308,7 +354,7 @@ The system’s architecture was selected and evolved based on concrete requireme
 
 6. **Scalability (moderate priority)**
    - **Requirement:** Support growth from a single restaurant to multiple restaurants with minimal redesign.
-   - **How it is implemented:** Multi-tenant data model (`restaurant_id` foreign keys) supports many restaurants in one deployment; swapping SQLite→PostgreSQL is configuration-driven; and image storage is externalized to AWS S3.
+   - **How it is implemented:** Multi-tenant data model (`restaurant_id` foreign keys) supports many restaurants in one deployment; database configuration is environment-driven (`DATABASE_URL`) with PostgreSQL as the primary database; and image storage is externalized to AWS S3.
 
 #### Low Coupling
 
@@ -344,7 +390,8 @@ def create_order_endpoint(
 - **Single Responsibility:** Each module has one clear purpose
   - `auth_service.py`: Authentication and JWT management only
   - `order_service.py`: Order workflow and validation only
-  - `report_service.py`: Analytics calculations only
+    - `report_service.py`: Analytics orchestration and response shaping
+    - `report_repository.py`: Analytics query composition
 - **Domain-based organization:** Files grouped by business domain, not technical layer
 - **Focused classes:** Each service class handles operations for one entity type
 
@@ -366,11 +413,29 @@ Routes → Services → Repositories → Models
 - **Easy testing:** Can test each layer independently
 - **Flexible replacement:** Can swap implementations within a layer
 
-### 3.3 Scalability Considerations
+### 3.3 NFR to Architecture Characteristic Mapping
+
+This section demonstrates how **non-functional requirements** (stakeholder needs) drove the selection and implementation of **architecture characteristics** (technical design qualities).
+
+| Non-Functional Requirement                | Architecture Characteristics             | Implementation Evidence                                                                                                                                                                        |
+| ----------------------------------------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **NFR-1: Security & Data Isolation**      | Security, Testability                    | JWT Bearer authentication, bcrypt password hashing, `restaurant_id` scoping in all queries, role-based dependencies (`require_owner`), architecture fitness tests for authorization boundaries |
+| **NFR-2: Usability**                      | Simplicity, Responsiveness               | QR-based customer access (no registration), 5-second auto-refresh, mobile-responsive Tailwind layout, color-coded status badges, user-friendly validation messages                             |
+| **NFR-3: Performance**                    | Efficiency, Scalability                  | PostgreSQL with indexes on foreign keys, S3 for image offloading, repository-based query composition, multi-tenant support without N+1 queries                                                 |
+| **NFR-4: Maintainability & Evolvability** | Modularity, Testability, Maintainability | Layered architecture (routes/services/repositories/models), single-responsibility services, dependency injection, 34 automated backend tests, architecture fitness checks                      |
+| **NFR-5: Localization**                   | Configurability                          | Timezone utilities (`THAI_TZ`), currency formatters (THB), environment-driven config, `now_thai()` helper functions                                                                            |
+
+**Key insight:** Architecture characteristics are not arbitrary—they are **trade-off decisions** made to satisfy specific requirements. For example:
+
+- **Security vs. Usability:** Customers can order without authentication (usability), but this required QR token validation and table-scoped access controls (security).
+- **Modularity vs. Simplicity:** Layered architecture adds abstraction overhead but enables independent testing and feature additions without cross-contamination.
+- **Performance vs. Maintainability:** Externalizing images to S3 improves performance but adds operational complexity.
+
+### 3.4 Scalability Considerations
 
 #### Current Implementation (Development)
 
-- SQLite database for simplicity
+- PostgreSQL database for realistic multi-tenant behavior
 - Single-server deployment
 - In-memory sessions
 
@@ -382,14 +447,14 @@ Routes → Services → Repositories → Models
 4. **WebSocket:** Replace polling with WebSocket or SSE for real-time updates
 5. **Microservices:** Split into separate services (Order Service, Menu Service, Analytics Service)
 
-### 3.4 Security Architecture
+### 3.5 Security Architecture
 
 #### Authentication Flow
 
 1. User submits credentials → `/api/auth/login`
 2. Backend validates against database (bcrypt check)
 3. Generate JWT with role and user ID embedded
-4. Return token to client (30-minute expiration)
+4. Return token to client (expiration controlled by configuration)
 5. Client stores in localStorage
 6. All subsequent requests include `Authorization: Bearer <token>` header
 7. Backend validates token on each request
@@ -460,6 +525,7 @@ Routes → Services → Repositories → Models
 │  │  Repositories (Data Access Layer)                    │    │
 │  │  - UserRepository, MenuItemRepository               │    │
 │  │  - OrderRepository, TableRepository                 │    │
+│  │  - ReportRepository                                 │    │
 │  └──────────────────────┬───────────────────────────────┘    │
 │                         │                                     │
 │  ┌─────────────────────────────────────────────────────┐    │
@@ -471,14 +537,460 @@ Routes → Services → Repositories → Models
             ┌────────────┴─────────────┐
             │                          │
     ┌───────▼────────┐      ┌─────────▼────────┐
-    │   SQLite DB    │      │   AWS S3         │
+    │ PostgreSQL DB  │      │   AWS S3         │
     │   (Orders,     │      │   (Menu Item     │
     │    Users,      │      │    Images)       │
     │    Menus)      │      │                  │
     └────────────────┘      └──────────────────┘
 ```
 
-### 4.2 Component Interaction Diagrams
+### 4.2 High-Level Architecture Overview
+
+The system follows a **client-server architecture** with a clear **layered architecture pattern** on the backend. This structure separates concerns across multiple tiers to achieve modularity, maintainability, and scalability.
+
+**Overall Structure:**
+
+- **Client Tier (Frontend):** Single-page application (SPA) built with Vue 3 that runs entirely in the user's browser. The frontend communicates with the backend exclusively through HTTP REST APIs. Three distinct user interfaces are provided: QR-based customer ordering (no authentication), staff dashboard (order management), and owner dashboard (full administrative control including analytics).
+
+- **Server Tier (Backend):** FastAPI-based REST API server implementing a strict **four-layer architecture**:
+  - **Presentation Layer (Routes):** HTTP endpoints that handle request/response formatting and input validation
+  - **Business Logic Layer (Services):** Domain-specific workflow orchestration, business rule enforcement, and multi-repository coordination
+  - **Data Access Layer (Repositories):** Database query composition and transaction management
+  - **Domain Layer (Models):** SQLAlchemy ORM entities defining database schema and relationships
+
+- **Data Tier:** PostgreSQL relational database providing persistent storage with multi-tenant isolation via `restaurant_id` scoping. AWS S3 serves as external object storage for menu item images, offloading binary data from the primary database.
+
+- **Integration Tier:** RESTful HTTP communication between frontend and backend using JSON payloads. JWT tokens (stored in browser localStorage) authenticate and authorize requests. The frontend polls backend endpoints every 5 seconds for real-time order status updates.
+
+**Architectural Style:** The backend implements a **closed layered architecture** where each layer communicates only with the layer directly below it (Routes → Services → Repositories → Models). This unidirectional dependency flow prevents layer-skipping and ensures business logic remains centralized in the service layer rather than being scattered across routes or repositories. Architecture fitness tests enforce these boundaries automatically.
+
+**Multi-Tenancy:** The system is designed as a multi-tenant application where multiple restaurants share the same application instance and database. Data isolation is enforced at the database level through `restaurant_id` foreign keys on all tenant-scoped entities (users, tables, menu items, orders). Each restaurant's data remains completely isolated from other restaurants.
+
+---
+
+### 4.3 Components and Responsibilities
+
+This section documents the major components/modules in each architectural layer, their roles, and interfaces.
+
+#### 4.3.1 Presentation Layer (API Routes)
+
+**Name:** `auth.py` (Authentication Routes)
+
+**Description:** Handles user authentication endpoints for login and logout operations.
+
+**Inputs/Outputs:**
+
+- Input: Login credentials (username, password) via POST request body
+- Output: JWT access token and user profile (role, username, restaurant_id)
+
+**Interfaces/APIs:**
+
+- `POST /api/auth/login` - Authenticate user and return JWT token
+- `POST /api/auth/logout` - Client-side logout (token invalidation)
+
+---
+
+**Name:** `menus.py` (Menu Routes)
+
+**Description:** Exposes HTTP endpoints for menu item management including CRUD operations and image uploads.
+
+**Inputs/Outputs:**
+
+- Input: Menu item data (name, price, category, image file), JWT token for authentication
+- Output: Menu item objects with image URLs, category lists
+
+**Interfaces/APIs:**
+
+- `GET /api/menus/` - List all menu items for authenticated user's restaurant
+- `GET /api/menus/{item_id}` - Get single menu item details
+- `POST /api/menus/` - Create new menu item with optional image upload (owner only)
+- `PATCH /api/menus/{item_id}` - Update menu item (owner for full update, staff for availability toggle)
+- `DELETE /api/menus/{item_id}` - Delete menu item (owner only)
+- `GET /api/menus/categories` - List available menu categories
+
+---
+
+**Name:** `orders.py` (Order Routes)
+
+**Description:** Provides endpoints for order lifecycle management including creation, status updates, and item management.
+
+**Inputs/Outputs:**
+
+- Input: Order data (table number, QR token, items), status updates, JWT token
+- Output: Order objects with items, statuses, and timestamps
+
+**Interfaces/APIs:**
+
+- `GET /api/orders/` - List all orders (staff/owner) or active order (customer via QR)
+- `GET /api/orders/{order_id}` - Get specific order details
+- `POST /api/orders/` - Create new order (customer via QR)
+- `PATCH /api/orders/{order_id}/payment-status` - Update payment status (staff/owner)
+- `PATCH /api/orders/{order_id}/items/{item_id}/status` - Update individual item status (staff/owner)
+- `DELETE /api/orders/{order_id}/items/{item_id}` - Cancel order item (if NEW status and UNPAID)
+
+---
+
+**Name:** `tables.py` (Table Routes)
+
+**Description:** Manages restaurant tables and QR code generation for customer access.
+
+**Inputs/Outputs:**
+
+- Input: Table numbers, QR tokens, JWT token
+- Output: Table objects with QR tokens and status information
+
+**Interfaces/APIs:**
+
+- `GET /api/tables/` - List all tables for restaurant (owner only)
+- `GET /api/tables/{table_id}` - Get specific table details
+- `POST /api/tables/` - Create new table with QR token (owner only)
+- `DELETE /api/tables/{table_id}` - Delete table (owner only)
+
+---
+
+**Name:** `reports.py` (Analytics Routes)
+
+**Description:** Exposes analytics and reporting endpoints for business intelligence.
+
+**Inputs/Outputs:**
+
+- Input: Date ranges, restaurant_id from JWT
+- Output: Aggregated analytics data (revenue, sales trends, top items, time distributions)
+
+**Interfaces/APIs:**
+
+- `GET /api/reports/overall` - Overall statistics (total revenue, order count, averages)
+- `GET /api/reports/daily-sales` - Daily sales summary for date range
+- `GET /api/reports/top-items` - Top selling items by quantity or revenue
+- `GET /api/reports/category-revenue` - Revenue breakdown by menu category
+- `GET /api/reports/hourly-distribution` - Order distribution by hour of day
+
+---
+
+#### 4.3.2 Business Logic Layer (Services)
+
+**Name:** `auth_service.py` (AuthService)
+
+**Description:** Handles authentication logic including password verification, JWT token generation, and user validation.
+
+**Inputs/Outputs:**
+
+- Input: Username, password, database session
+- Output: JWT token string, user object
+
+**Interfaces/APIs:**
+
+- `authenticate(username, password) -> dict` - Verify credentials and generate token
+- `create_access_token(data, expires_delta) -> str` - Generate JWT token
+- `verify_password(plain, hashed) -> bool` - Compare passwords using bcrypt
+
+---
+
+**Name:** `menu_service.py` (MenuService)
+
+**Description:** Orchestrates menu item operations including image upload to S3 and menu item lifecycle management.
+
+**Inputs/Outputs:**
+
+- Input: Menu item data, image files, restaurant_id
+- Output: MenuItem objects with resolved S3 image URLs
+
+**Interfaces/APIs:**
+
+- `list_menu_items(restaurant_id) -> list[MenuItem]` - Get all menu items
+- `get_menu_item(item_id) -> MenuItem` - Get single item
+- `create_menu_item(name, price, category, ...) -> MenuItem` - Create new item
+- `update_menu_item(item_id, **changes) -> MenuItem` - Update existing item
+- `delete_menu_item(item_id) -> bool` - Delete item
+- `upload_menu_image(image, restaurant_id) -> str` - Upload image to S3
+- `list_categories() -> list[MenuCategory]` - Get available categories
+
+---
+
+**Name:** `order_service.py` (OrderService)
+
+**Description:** Implements order workflow business rules including status transitions, payment validation, and multi-repository coordination.
+
+**Inputs/Outputs:**
+
+- Input: Order data, QR tokens, status transitions, restaurant_id
+- Output: Order objects with items and validation results
+
+**Interfaces/APIs:**
+
+- `list_orders(restaurant_id) -> list[Order]` - Get all orders
+- `list_active_orders(restaurant_id) -> list[Order]` - Get active orders only
+- `create_order(order_data) -> Order` - Create order with QR validation
+- `get_order(order_id) -> Order` - Get specific order
+- `get_active_order_for_table(table_number, qr_token) -> Order` - QR-based order lookup
+- `update_order_status(order_id, new_status) -> Order` - Validate and update order status
+- `update_payment_status(order_id, payment_status) -> Order` - Process payment with completion checks
+- `update_order_item_status(order_id, item_id, new_status) -> Order` - Update individual item status
+- `cancel_order_item(order_id, item_id) -> Order` - Cancel item if eligible
+
+---
+
+**Name:** `table_service.py` (TableService)
+
+**Description:** Manages table operations and QR token generation for customer access.
+
+**Inputs/Outputs:**
+
+- Input: Table numbers, restaurant_id
+- Output: Table objects with QR tokens
+
+**Interfaces/APIs:**
+
+- `list_tables(restaurant_id) -> list[Table]` - Get all tables
+- `get_table(table_id) -> Table` - Get specific table
+- `create_table(number, restaurant_id) -> Table` - Create table with unique QR token
+- `delete_table(table_id) -> bool` - Delete table if no active orders
+
+---
+
+**Name:** `report_service.py` (ReportService)
+
+**Description:** Orchestrates analytics queries and formats reporting data for API responses.
+
+**Inputs/Outputs:**
+
+- Input: Restaurant_id, date ranges
+- Output: Formatted analytics dictionaries
+
+**Interfaces/APIs:**
+
+- `get_overall_stats(restaurant_id) -> dict` - Calculate overall metrics
+- `get_daily_sales(restaurant_id, days) -> list[dict]` - Daily sales trend
+- `get_top_items(restaurant_id, limit) -> list[dict]` - Top selling items
+- `get_category_revenue(restaurant_id) -> list[dict]` - Revenue by category
+- `get_hourly_distribution(restaurant_id) -> list[dict]` - Orders by hour
+
+---
+
+**Name:** `s3_service.py` (S3Service)
+
+**Description:** Handles AWS S3 interactions for menu item image uploads and URL generation.
+
+**Inputs/Outputs:**
+
+- Input: File streams, object keys, bucket configuration
+- Output: Public S3 URLs for uploaded images
+
+**Interfaces/APIs:**
+
+- `upload_file(file_stream, filename, content_type) -> str` - Upload to S3
+- `get_presigned_url(object_key, expiration) -> str` - Generate temporary access URL
+
+---
+
+#### 4.3.3 Data Access Layer (Repositories)
+
+**Name:** `user_repository.py` (UserRepository)
+
+**Description:** Encapsulates all database queries related to user management.
+
+**Inputs/Outputs:**
+
+- Input: Database session, user data, filters
+- Output: User model instances
+
+**Interfaces/APIs:**
+
+- `get_by_username(username) -> User` - Find user by username
+- `get_by_id(user_id) -> User` - Find user by ID
+- `create(username, hashed_password, role, ...) -> User` - Create new user
+- `delete(user_id) -> bool` - Delete user account
+
+---
+
+**Name:** `menu_item_repository.py` (MenuItemRepository)
+
+**Description:** Manages database operations for menu items.
+
+**Inputs/Outputs:**
+
+- Input: Database session, menu item data, restaurant_id
+- Output: MenuItem model instances
+
+**Interfaces/APIs:**
+
+- `list_all(restaurant_id) -> list[MenuItem]` - Get all items for restaurant
+- `get_by_id(item_id) -> MenuItem` - Get specific item
+- `create(name, price, category, ...) -> MenuItem` - Insert new item
+- `update(item_id, **changes) -> MenuItem` - Update existing item
+- `delete(item_id) -> bool` - Delete item
+
+---
+
+**Name:** `order_repository.py` (OrderRepository)
+
+**Description:** Handles all order and order item database operations.
+
+**Inputs/Outputs:**
+
+- Input: Database session, order data, filters, status updates
+- Output: Order and OrderItem model instances
+
+**Interfaces/APIs:**
+
+- `list_all(restaurant_id) -> list[Order]` - Get all orders
+- `list_active(restaurant_id) -> list[Order]` - Get active (unpaid) orders
+- `get_by_id(order_id) -> Order` - Get specific order
+- `get_active_by_table_id(table_id) -> Order` - Find active order for table
+- `create_order(table_id, restaurant_id) -> Order` - Create new order
+- `add_item(order_id, menu_item_id, quantity, unit_price) -> OrderItem` - Add item to order
+- `get_order_item(order_id, item_id) -> OrderItem` - Get specific order item
+- `update_status(order, new_status) -> Order` - Update order status
+- `update_payment_status(order, payment_status) -> Order` - Update payment status
+- `update_item_status(item, new_status) -> OrderItem` - Update item status
+- `delete_item(item) -> bool` - Delete order item
+
+---
+
+**Name:** `table_repository.py` (TableRepository)
+
+**Description:** Manages database queries for restaurant tables.
+
+**Inputs/Outputs:**
+
+- Input: Database session, table data, restaurant_id
+- Output: Table model instances
+
+**Interfaces/APIs:**
+
+- `list_all(restaurant_id) -> list[Table]` - Get all tables
+- `get_by_id(table_id) -> Table` - Get specific table
+- `get_by_number(number, restaurant_id) -> Table` - Find table by number
+- `get_by_qr_token(qr_token) -> Table` - Find table by QR token
+- `create(number, qr_token, restaurant_id) -> Table` - Create new table
+- `update_status(table, status) -> Table` - Update table availability
+- `delete(table_id) -> bool` - Delete table
+
+---
+
+**Name:** `report_repository.py` (ReportRepository)
+
+**Description:** Composes complex analytics queries for reporting endpoints.
+
+**Inputs/Outputs:**
+
+- Input: Database session, restaurant_id, date filters
+- Output: Aggregated query results (dictionaries, tuples)
+
+**Interfaces/APIs:**
+
+- `get_overall_counts(restaurant_id) -> dict` - Total orders, revenue, averages
+- `get_daily_sales(restaurant_id, days) -> list` - Daily aggregated sales
+- `get_top_items_by_quantity(restaurant_id, limit) -> list` - Most ordered items
+- `get_top_items_by_revenue(restaurant_id, limit) -> list` - Highest revenue items
+- `get_category_breakdown(restaurant_id) -> list` - Revenue per category
+- `get_hourly_counts(restaurant_id) -> list` - Order count per hour
+
+---
+
+#### 4.3.4 Domain Layer (Models)
+
+**Name:** `user.py` (User Model)
+
+**Description:** Represents system users (owners and staff) with authentication data.
+
+**Attributes:**
+
+- `id` (PK), `username`, `hashed_password`, `role` (owner/staff)
+- `restaurant_id` (FK), `created_by_id` (FK for staff), `created_at`
+
+**Relationships:**
+
+- `restaurant` - Many-to-one with Restaurant
+- `created_by` - Self-referencing for staff accounts
+
+---
+
+**Name:** `restaurant.py` (Restaurant Model)
+
+**Description:** Represents the multi-tenant restaurant entity.
+
+**Attributes:**
+
+- `id` (PK), `name`, `created_at`
+
+**Relationships:**
+
+- `users` - One-to-many with User
+- `tables` - One-to-many with Table
+- `menu_items` - One-to-many with MenuItem
+- `orders` - One-to-many with Order
+
+---
+
+**Name:** `menu_item.py` (MenuItem Model)
+
+**Description:** Represents dishes available for ordering.
+
+**Attributes:**
+
+- `id` (PK), `name`, `description`, `price`, `category`, `image_url`
+- `is_available`, `restaurant_id` (FK), `created_at`, `updated_at`
+
+**Relationships:**
+
+- `restaurant` - Many-to-one with Restaurant
+- `order_items` - One-to-many with OrderItem
+
+---
+
+**Name:** `order.py` (Order Model)
+
+**Description:** Represents customer orders with status and payment tracking.
+
+**Attributes:**
+
+- `id` (PK), `table_id` (FK), `restaurant_id` (FK)
+- `status` (NEW/PREPARING/READY/COMPLETED/CANCELLED)
+- `payment_status` (UNPAID/PAID), `created_at`, `updated_at`, `closed_at`
+
+**Relationships:**
+
+- `table` - Many-to-one with Table
+- `restaurant` - Many-to-one with Restaurant
+- `items` - One-to-many with OrderItem
+
+---
+
+**Name:** `order_item.py` (OrderItem Model)
+
+**Description:** Represents individual dishes within an order with per-item status tracking.
+
+**Attributes:**
+
+- `id` (PK), `order_id` (FK), `menu_item_id` (FK, nullable)
+- `quantity`, `unit_price`, `status` (NEW/PREPARING/READY/COMPLETED)
+- `created_at`, `updated_at`
+
+**Relationships:**
+
+- `order` - Many-to-one with Order
+- `menu_item` - Many-to-one with MenuItem (nullable for deleted items)
+
+---
+
+**Name:** `table.py` (Table Model)
+
+**Description:** Represents physical restaurant tables with QR code access.
+
+**Attributes:**
+
+- `id` (PK), `number`, `qr_token` (unique), `restaurant_id` (FK)
+- `status` (AVAILABLE/OCCUPIED), `created_at`
+
+**Relationships:**
+
+- `restaurant` - Many-to-one with Restaurant
+- `orders` - One-to-many with Order
+
+---
+
+### 4.4 Component Interaction Diagrams
 
 #### Customer Ordering Sequence
 
@@ -601,7 +1113,7 @@ Staff      Frontend      Backend       Database
   │<──────────┤            │              │
 ```
 
-### 4.3 Data Flow Example: Per-Item Status Update
+### 4.5 Data Flow Example: Per-Item Status Update
 
 1. **Staff clicks "Start Preparing" on a dish**
 2. Frontend sends PATCH `/api/orders/{order_id}/items/{item_id}/status`
@@ -621,72 +1133,22 @@ Staff      Frontend      Backend       Database
 
 ### 5.1 Entity-Relationship Diagram
 
-```
-┌─────────────────┐
-│     users       │
-├─────────────────┤
-│ id (PK)         │───┐
-│ username        │   │
-│ hashed_password │   │
-│ role            │   │ (Owner who created staff)
-│ created_by_id   │───┘
-│ created_at      │
-└─────────────────┘
-
-┌─────────────────┐
-│     tables      │
-├─────────────────┤
-│ id (PK)         │──────────────┐
-│ number (UNIQUE) │              │
-│ qr_token        │              │ (1)
-│ created_at      │              │
-└─────────────────┘              │
-                                 │
-                                 │
-┌─────────────────┐              │
-│   menu_items    │              │
-├─────────────────┤              │
-│ id (PK)         │───┐          │
-│ name            │   │          │
-│ description     │   │          │
-│ price           │   │          │
-│ category        │   │          │
-│ image_url       │   │          │
-│ is_available    │   │          │
-│ created_at      │   │          │
-│ updated_at      │   │          │
-└─────────────────┘   │          │
-                      │          │
-                      │ (Many)   │
-                      │          │
-┌─────────────────┐   │          │
-│     orders      │   │          │
-├─────────────────┤   │          │
-│ id (PK)         │───┼──┐       │
-│ table_id (FK)   │───┘  │       │
-│ table_number    │      │       │
-│ payment_status  │      │ (1)   │
-│ created_at      │      │       │
-│ updated_at      │      │       │
-└─────────────────┘      │       │
-        │                │       │
-        │ Has Many       │       │
-        │                │       │
-┌────────────────┐       │       │
-│  order_items   │       │       │
-├────────────────┤       │       │
-│ id (PK)        │───────┘       │
-│ order_id (FK)  │               │
-│ menu_item_id   │───────────────┘
-│ quantity       │
-│ price          │
-│ status         │ (NEW/PREPARING/READY/COMPLETED)
-│ created_at     │
-│ updated_at     │
-└────────────────┘
-```
+[ER Diagram](docs/diagrams/schema.png)
 
 ### 5.2 Table Schemas
+
+### 5.2.1 Current Implementation Alignment (Important)
+
+The running backend is multi-tenant and extends the conceptual schema above as follows:
+
+- A `restaurants` table exists and is the tenant root.
+- `users`, `tables`, `menu_items`, and `orders` include `restaurant_id` foreign keys.
+- `order_items.menu_item_id` is nullable with `ON DELETE SET NULL` to preserve order history when menu items are deleted.
+- `orders` contains both `status` and `payment_status`, plus `closed_at` for completion/payment lifecycle tracking.
+
+This alignment ensures tenant isolation and historical integrity while preserving layered service/repository flows.
+
+### 5.2.2 Conceptual Table Schemas
 
 #### Users Table
 
@@ -967,7 +1429,7 @@ def mark_order_as_paid(order_id: int, db: Session) -> Order:
 - Automatic OpenAPI documentation
 - Built-in validation with Pydantic
 - Easy dependency injection
-- Excellent performance
+- Good performance for this project scope
 
 **Alternatives considered:**
 
@@ -980,7 +1442,7 @@ def mark_order_as_paid(order_id: int, db: Session) -> Order:
 
 - Reactive and component-based
 - Composition API provides better code organization
-- Excellent developer experience
+- Strong developer experience
 - Lightweight compared to Angular
 
 **Alternatives considered:**
@@ -988,16 +1450,15 @@ def mark_order_as_paid(order_id: int, db: Session) -> Order:
 - React: More verbose, JSX syntax
 - Angular: Overkill for this scale
 
-#### Database: SQLite
+#### Database: PostgreSQL
 
 **Chosen for:**
 
-- Zero configuration for development
-- File-based (easy to reset and demo)
-- Sufficient for prototype/MVP
-- Easy migration path to PostgreSQL
+- Reliable relational database for multi-tenant deployments
+- Better concurrency support than SQLite
+- Strong SQL feature set for reporting/analytics queries
 
-**Production alternative:** PostgreSQL for concurrent access
+**Testing approach:** The automated test suite uses a temporary SQLite database for fast, isolated tests.
 
 #### Authentication: JWT
 
@@ -1063,17 +1524,18 @@ def update_item_status(order_id: int, item_id: int, new_status: ItemStatus) -> O
 #### Analytics Calculations
 
 ```python
-def get_top_selling_items(db: Session, limit: int = 10):
+def get_top_selling_items(db: Session, restaurant_id: int, limit: int = 10):
     # Aggregate order items grouped by menu item
     results = (
         db.query(
             MenuItem.name,
             func.sum(OrderItem.quantity).label('total_quantity'),
-            func.sum(OrderItem.quantity * OrderItem.price).label('total_revenue')
+            func.sum(OrderItem.quantity * OrderItem.unit_price).label('total_revenue')
         )
         .join(OrderItem, MenuItem.id == OrderItem.menu_item_id)
         .join(Order, OrderItem.order_id == Order.id)
         .filter(Order.payment_status == PaymentStatus.PAID)  # Only paid orders
+        .filter(Order.restaurant_id == restaurant_id)  # Tenant scoping
         .group_by(MenuItem.id, MenuItem.name)
         .order_by(func.sum(OrderItem.quantity).desc())
         .limit(limit)
@@ -1211,13 +1673,30 @@ def utc_to_thai(dt: datetime) -> datetime:
 
 ```javascript
 function formatCurrency(value) {
-  return new Intl.NumberFormat("th-TH", {
+  // English UI but Thai currency
+  return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "THB",
   }).format(value);
 }
 
-// Example output: ฿350.00
+// Example output (browser-dependent): THB 350.00
+```
+
+#### Frontend Date/Time Formatting (Bangkok)
+
+```javascript
+function formatThaiTime(isoString) {
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Bangkok",
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  }).format(new Date(isoString));
+}
 ```
 
 ### 7.6 Real-Time Updates Implementation
@@ -1254,13 +1733,30 @@ async def websocket_endpoint(websocket: WebSocket, order_id: int):
         await websocket.send_json(order.dict())
 ```
 
+### 7.7 Automated Testing (pytest)
+
+The backend includes an automated test suite to validate both **business rules** and **security boundaries**.
+
+- **Framework:** `pytest` + FastAPI `TestClient`
+- **Isolation:** tests run against a temporary SQLite database file, and the schema is recreated per test for clean state.
+- **Coverage focus:** multi-tenant data isolation, role-based access control, QR-token customer flows, menu/table rules, order lifecycle, and reporting access.
+
+**Current suite size:** 34 backend tests passing.
+
+Architecture fitness functions are included to enforce layered boundaries and coupling constraints, including:
+
+- Routes must not import repositories directly
+- Services must not import route modules
+- Repositories must not import services/routes
+- Services avoid direct ORM query composition (`.query(...)`) to reduce sinkhole risk
+
 ---
 
 ## 8. Conclusion
 
 ### 8.1 Project Summary
 
-This Restaurant Order Management System successfully addresses the inefficiencies of paper-based order tracking by providing a comprehensive digital solution. The system implements a clear **layered architecture** with three distinct user roles (Customer, Staff, Owner), each with appropriate permissions and responsibilities.
+This Restaurant Order Management System addresses key inefficiencies of paper-based order tracking through a digital workflow. The current implementation uses a **layered architecture** with three user roles (Customer, Staff, Owner), each with defined permissions and responsibilities.
 
 Key achievements include:
 
@@ -1277,38 +1773,6 @@ Key achievements include:
 3. **High Cohesion**: Each service handles a single domain with focused responsibilities
 4. **Unidirectional Dependencies**: Clean dependency flow prevents circular references
 5. **Scalability**: Architecture supports future upgrades (PostgreSQL, WebSocket, microservices)
-
-### 8.3 Learning Outcomes
-
-Through this project, I gained practical experience in:
-
-- Designing and implementing layered architecture patterns
-- Building RESTful APIs with FastAPI
-- Creating reactive frontends with Vue 3 Composition API
-- Implementing JWT-based authentication and authorization
-- Designing normalized database schemas with proper relationships
-- Applying business rules and validation logic
-- Integrating third-party services (AWS S3)
-- Localizing applications for specific markets (Thai timezone/currency)
-
-### 8.4 Future Enhancements
-
-While the current MVP is fully functional, potential improvements include:
-
-1. **WebSocket/SSE** for real-time updates instead of polling
-2. **Unit and integration tests** for code reliability
-3. **PostgreSQL migration** for production deployment
-4. **Order filtering and search** for better order management
-5. **Print integration** for kitchen receipt printing
-6. **Inventory tracking** to manage stock levels
-7. **Multi-language support** (English and Thai)
-8. **Mobile applications** for better mobile experience
-
-### 8.5 Reflection
-
-This project demonstrates how thoughtful architecture design can create maintainable, scalable systems that solve real-world problems. The layered architecture pattern proved effective for organizing code, enabling independent development of each layer, and providing clear upgrade paths for future enhancements.
-
-The system successfully meets all functional requirements while maintaining clean code structure and following software engineering best practices.
 
 ---
 
