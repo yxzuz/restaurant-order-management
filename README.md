@@ -45,23 +45,33 @@ The main goals of the system are:
 
 ## 📑 Table of Contents
 
-1. [System Features](#-system-features)
-2. [User Roles & Permissions](#-user-roles--permissions)
-3. [System Workflow](#-system-workflow)
-4. [Technology Stack](#-technology-stack)
-5. [Project Structure](#-project-structure)
-6. [How to Run the Project](#-how-to-run-the-project)
-7. [API Endpoints](#-api-endpoints)
-8. [Key Implementation Details](#-key-implementation-details)
-9. [Architecture Patterns](#️-architecture-patterns)
-10. [Testing](#-testing-planned)
-11. [Future Enhancements](#-future-enhancements)
-12. [Current Project Status](#-current-project-status)
+1. [Overview](#overview)
+2. [Problem Statement](#problem-statement)
+3. [Objectives](#objectives)
+4. [System Features](#-system-features)
+5. [User Roles & Permissions](#-user-roles--permissions)
+6. [System Workflow](#-system-workflow)
+7. [Technology Stack](#-technology-stack)
+8. [Project Structure](#-project-structure)
+9. [How to Run the Project](#-how-to-run-the-project)
+10. [API Endpoints](#-api-endpoints)
+11. [Key Implementation Details](#-key-implementation-details)
+12. [System Architecture Overview](#-system-architecture-overview)
 13. [Troubleshooting](#-troubleshooting)
+14. [Screenshots](#-screenshots)
 
 ---
 
 ## 🎯 System Features
+
+### 📱 Mobile-Responsive Design
+
+- **Mobile-First Interface**: Optimized layouts for phones, tablets, and desktops
+- **Responsive Breakpoints**: Tailwind CSS breakpoints (sm/md/lg/xl) for fluid layouts
+- **Touch-Optimized**: Larger tap targets and gesture-friendly interactions
+- **Hamburger Navigation**: Collapsible sidebar menu on mobile devices
+- **Adaptive Grids**: 2-column mobile layouts expanding to 4+ columns on desktop
+- **Responsive Typography**: Font sizes and spacing adjust for screen size
 
 ### 🔐 Authentication & Authorization
 
@@ -275,7 +285,9 @@ The main goals of the system are:
 - **Language**: JavaScript
 - **HTTP Client**: Axios
 - **Routing**: Vue Router (with route guards)
-- **Styling**: Tailwind CSS
+- **Styling**: Tailwind CSS with responsive design
+- **Responsive Design**: Mobile-first approach with breakpoints (sm: 640px, md: 768px, lg: 1024px, xl: 1280px)
+- **Mobile Features**: Hamburger menu, touch-optimized controls, responsive grids and layouts
 - **UI Components**: Custom component library with shadcn/ui patterns
 - **Icons**: lucide-vue-next
 - **State**: localStorage for authentication
@@ -284,8 +296,8 @@ The main goals of the system are:
 
 - **Framework**: FastAPI (Python 3.11+)
 - **ORM**: SQLAlchemy
-- **Database**: SQLite (development) - easily switchable to PostgreSQL/MySQL
-- **Authentication**: JWT (JSON Web Tokens) with 30-minute expiration
+- **Database**: PostgreSQL
+- **Authentication**: JWT (JSON Web Tokens) with 30 minutes expiration
 - **Password Hashing**: bcrypt
 - **Image Storage**: AWS S3 (boto3)
 - **Timezone**: Asia/Bangkok (UTC+7)
@@ -367,7 +379,8 @@ restaurant-order-management/
 │   │   │   ├── user_repository.py
 │   │   │   ├── table_repository.py
 │   │   │   ├── menu_item_repository.py
-│   │   │   └── order_repository.py
+│   │   │   ├── order_repository.py
+│   │   │   └── report_repository.py
 │   │   │
 │   │   ├── schemas/                  # Pydantic schemas
 │   │   │   ├── user.py
@@ -382,7 +395,7 @@ restaurant-order-management/
 │   │   │   ├── order_service.py      # Per-item status logic
 │   │   │   ├── table_service.py
 │   │   │   ├── s3_service.py         # AWS S3 image upload
-│   │   │   └── report_service.py     # Analytics calculations
+│   │   │   └── report_service.py     # Analytics orchestration and formatting
 │   │   │
 │   │   └── main.py                   # FastAPI app initialization
 │   │
@@ -444,179 +457,96 @@ restaurant-order-management/
 
 ### Prerequisites
 
-- **Python 3.11+**
+- **Python 3.11** (recommended for compatibility)
 - **Node.js 18+** and npm
-- **PostgreSQL 15+**
-- **AWS Account** (for S3 image uploads)
+- **PostgreSQL 15+** (database)
 
-### Environment Setup
+### 1) Backend (API)
 
-#### 1. Backend Setup
-
-**Navigate to backend directory:**
-
-```bash
-cd backend
-```
-
-**Create and activate virtual environment:**
-
-```bash
-python3 -m venv env
-source env/bin/activate  # On Windows: env\Scripts\activate
-```
-
-**Install dependencies:**
-
-```bash
-pip install -r requirements.txt
-```
-
-**Configure environment variables:**
-
-Create a `.env` file in the `backend/` directory:
-
-```env
-# Database
-DATABASE_URL=postgresql://postgres@localhost/restaurant_db
-
-# JWT Authentication
-SECRET_KEY=your-secret-key-here-change-in-production
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=30
-
-# AWS S3 (for menu item images)
-AWS_ACCESS_KEY_ID=your-aws-access-key
-AWS_SECRET_ACCESS_KEY=your-aws-secret-key
-AWS_REGION=ap-southeast-1
-S3_BUCKET_NAME=your-bucket-name
-```
-
-**Create PostgreSQL database (first time only):**
+**Create PostgreSQL database:**
 
 ```bash
 createdb restaurant_db
 ```
 
-**Run database migrations (automatic on startup):**
-
-The system automatically creates tables and runs migrations on first startup.
-
-**Start the backend server:**
+**Set up backend:**
 
 ```bash
-python -m uvicorn app.main:app --reload --port 8000
+cd backend
+
+# Create venv (macOS/Linux)
+python3.11 -m venv env
+source env/bin/activate
+
+# Install deps
+python -m pip install -r requirements.txt -r requirements-dev.txt
 ```
 
-Backend runs at: **http://localhost:8000**
+Create `backend/.env` (required):
 
-#### 2. Frontend Setup
+```env
+# Database (PostgreSQL)
+DATABASE_URL=postgresql://postgres@localhost/restaurant_db
 
-**Navigate to frontend directory:**
+# JWT (required)
+SECRET_KEY=change-me
+
+# S3 (required by settings; use real values if you want image upload)
+AWS_REGION=ap-southeast-1
+AWS_S3_BUCKET=your-bucket-name
+AWS_ACCESS_KEY_ID=your-access-key
+AWS_SECRET_ACCESS_KEY=your-secret-key
+```
+
+Run the API:
+
+```bash
+uvicorn app.main:app --reload --port 8000
+```
+
+- API: http://localhost:8000
+- Swagger docs: http://localhost:8000/docs
+
+### 2) Frontend (Web UI)
 
 ```bash
 cd frontend
-```
-
-**Install dependencies:**
-
-```bash
 npm install
-```
-
-**Configure API endpoint (optional):**
-
-Update `frontend/src/services/api.js` if backend is not on localhost:8000
-
-**Start development server:**
-
-```bash
 npm run dev
 ```
 
-Frontend runs at: **http://localhost:5173** (or http://localhost:3000 depending on Vite config)
+Open: http://localhost:5173
 
-### 🎯 Initial Setup & Demo Data
+### 3) First-time setup (create restaurant + owner)
 
-**Default Accounts:**
-
-After first run, create an owner account:
-
-```bash
-# In backend with virtual env activated:
-python -c "from app.services.auth_service import AuthService; from app.db import SessionLocal; db = SessionLocal(); auth = AuthService(db); auth.register_user('owner', 'owner@restaurant.com', 'password123', 'owner'); print('Owner created')"
-```
-
-Or use the API:
+Create an owner (also creates the restaurant):
 
 ```bash
 curl -X POST http://localhost:8000/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{
     "username": "owner",
-    "email": "owner@restaurant.com",
     "password": "password123",
-    "role": "owner"
+    "restaurant_name": "My Restaurant"
   }'
 ```
 
-**Login credentials:**
+Then log in via the UI and create tables from the **Tables** page (needed for QR/customer flow).
 
-- Owner: `owner` / `password123`
+### 4) Run tests (backend)
 
-Then create staff accounts through the Owner → Staff page in the UI.
+```bash
+cd backend
+source env/bin/activate
+python -m pytest -q
+```
 
-**Tables are pre-created (Tables 1-20)** with unique QR tokens on first startup.
-
-### 📱 Accessing Customer Interface
-
-1. **Log in as Owner**
-2. **Navigate to "Tables" page**
-3. **View QR codes** for each table
-4. **Scan QR code** or click the link to access customer ordering interface
-5. Customer URL format: `http://localhost:5173/table/{table_number}?token={qr_token}`
+---
 
 ## 📡 API Endpoints
 
-**Interactive API Documentation:** http://localhost:8000/docs
-
-### Authentication
-
-- `POST /api/auth/register` - Register new user (owner/staff)
-- `POST /api/auth/login` - Login and get JWT token
-- `POST /api/auth/staff` - Create staff account (owner only)
-- `DELETE /api/auth/staff/{user_id}` - Delete staff account (owner only)
-
-### Menu Management
-
-- `GET /api/menus` - Get all menu items
-- `GET /api/menus/{id}` - Get specific menu item
-- `POST /api/menus` - Create menu item with image upload (owner only)
-- `PATCH /api/menus/{id}` - Update menu item (owner full, staff availability only)
-- `DELETE /api/menus/{id}` - Delete menu item (owner only)
-
-### Order Management
-
-- `GET /api/orders` - Get all orders (staff/owner)
-- `GET /api/orders/{id}` - Get specific order
-- `POST /api/orders` - Create new order (customer)
-- `PATCH /api/orders/{id}/status` - Update order status
-- `PATCH /api/orders/{id}/payment` - Mark as paid
-- `PATCH /api/orders/{order_id}/items/{item_id}/status` - Update per-item status
-- `DELETE /api/orders/{order_id}/items/{item_id}` - Cancel item (if NEW)
-
-### Table Management
-
-- `GET /api/tables` - Get all tables
-- `GET /api/tables/{number}/active-order` - Get active order for table (with QR token)
-- `POST /api/tables` - Create new table (owner only)
-- `DELETE /api/tables/{number}` - Delete table (owner only)
-
-### Analytics & Reports (Owner Only)
-
-- `GET /api/reports/daily-sales?days=7` - Daily sales summary
-- `GET /api/reports/top-items?limit=10` - Top selling items
-- `GET /api/reports/analytics` - Comprehensive analytics dashboard data
+- Interactive docs (Swagger): http://localhost:8000/docs
+- Base path: `/api` (see Swagger for the full list)
 
 ---
 
@@ -641,21 +571,7 @@ NEW → PREPARING → READY → COMPLETED
 
 **Timezone:** All timestamps stored in Asia/Bangkok (UTC+7)
 
-```python
-# Backend: app/core/timezone.py
-from datetime import datetime, timezone, timedelta
-THAI_TZ = timezone(timedelta(hours=7))
-```
-
 **Currency:** All prices displayed in Thai Baht (฿)
-
-```javascript
-// Frontend: Customer formatCurrency()
-new Intl.NumberFormat("th-TH", {
-  style: "currency",
-  currency: "THB",
-}).format(value);
-```
 
 ### QR Code Flow
 
@@ -706,7 +622,9 @@ def require_staff_or_owner(token: str):
 
 ---
 
-## 🏗️ Architecture Patterns
+<a id="-system-architecture-overview"></a>
+
+## 🏗️ System Architecture Overview
 
 ### Layered Architecture
 
@@ -744,101 +662,16 @@ Routes → Services → Repositories → Models
 - No circular dependencies
 - Clean dependency flow
 
----
+✅ **Closed Layers by Default**
 
-## 🧪 Testing (Planned)
-
-**Unit Tests:**
-
-```python
-# backend/tests/test_order_service.py
-def test_cancel_order_item_validates_status():
-    # Test business logic without database
-```
-
-**Integration Tests:**
-
-```python
-# backend/tests/test_api_orders.py
-def test_create_order_endpoint():
-    # Test API with test database
-```
-
-**Frontend Tests:**
-
-```javascript
-// frontend/tests/OrderCard.spec.js
-describe("OrderCard", () => {
-  // Component testing
-});
-```
+- Requests flow through each adjacent layer (Routes → Services → Repositories)
+- Routes do not execute persistence queries directly
+- Services contain business logic and orchestration; repositories contain query composition
+- Reporting now follows this rule via `report_service.py` delegating data access to `report_repository.py`
 
 ---
 
-## 🔮 Future Enhancements
-
-### High Priority
-
-- **Unit & Integration Tests**: Comprehensive test suite
-- **Order Filtering**: Search and filter orders by date, status, table
-- **Logging System**: Structured logging for debugging and monitoring
-- **API Documentation**: Detailed endpoint documentation with examples
-
-### Medium Priority
-
-- **WebSocket/SSE**: Real-time updates instead of polling
-- **Notifications**: Push notifications for order status changes
-- **Multi-language**: Support English and Thai languages
-- **Print Integration**: Kitchen receipt printing
-- **Inventory Tracking**: Track ingredient stock levels
-
-### Low Priority
-
-- **Multi-restaurant Platform**: Support multiple restaurant locations
-- **Delivery Integration**: Third-party delivery service integration
-- **Online Payment**: Payment gateway integration (Stripe, PayPal, PromptPay)
-- **Customer Loyalty**: Points and rewards system
-- **Advanced Analytics**: Predictive analytics, trend analysis
-- **Mobile Apps**: Native iOS and Android applications
-
----
-
-## 📈 Current Project Status
-
-### ✅ Completed (MVP Features)
-
-- [x] Authentication & JWT with role-based access
-- [x] QR code table ordering system
-- [x] Per-item status tracking (NEW → PREPARING → READY → COMPLETED)
-- [x] Menu management with S3 image upload
-- [x] Order management with payment tracking
-- [x] Per-item cancellation (NEW items only)
-- [x] Real-time customer order updates (5s auto-refresh)
-- [x] Staff portal with limited access
-- [x] Comprehensive analytics dashboard
-- [x] Thai timezone support (UTC+7)
-- [x] Thai Baht (฿) currency formatting
-- [x] Role-based UI navigation
-- [x] Table management with QR codes
-- [x] Token expiration handling
-
-### 🔄 In Progress
-
-- [ ] Unit and integration tests
-- [ ] Order search and filtering
-- [ ] Structured logging system
-
-### 📋 Planned
-
-- [ ] WebSocket for real-time updates
-- [ ] Production deployment guide
-- [ ] Performance optimization
-- [ ] API rate limiting
-- [ ] Database migration to PostgreSQL
-
----
-
-## � Troubleshooting
+## 🧩 Troubleshooting
 
 ### Common Issues
 
@@ -934,15 +767,18 @@ npm install
 
 ---
 
-## � Screenshots
+## 📸 Screenshots
 
 ### Landing Page & Authentication
 
 ![Home Page](docs/screenshots/home.png)
 _Landing page with role-based access options_
 
-![Login Modal](docs/screenshots/login.png)
-_Owner/Staff login with validation_
+![Owner Login Modal](docs/screenshots/owner-login.png)
+_Owner login with validation_
+
+![Staff Login Modal](docs/screenshots/staff-login.png)
+_Staff login with validation_
 
 ### Customer Experience (QR Code Ordering)
 
@@ -976,9 +812,6 @@ _Edit menu item modal with AWS S3 image upload_
 ![Order List](docs/screenshots/order-list.png)
 _Order management dashboard for staff and owner_
 
-![Order Details](docs/screenshots/order-details.png)
-_Detailed order view with per-item status controls_
-
 ### Staff Management (Owner Only)
 
 ![Staff Management](docs/screenshots/staff-management.png)
@@ -993,7 +826,7 @@ _Table management with unique QR codes for each table_
 
 ---
 
-## �📝 License
+## 📝 License
 
 This project is developed for educational purposes as part of a Software Architecture course.
 
@@ -1013,5 +846,3 @@ This project is developed for educational purposes as part of a Software Archite
 This is an academic project. For suggestions or issues, please contact the development team.
 
 ---
-
-**Built with ❤️ for better restaurant operations**
